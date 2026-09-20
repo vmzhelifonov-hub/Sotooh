@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django: runserver (native venv)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "manage.py",
+      "args": ["runserver", "8000"],
+      "cwd": "${workspaceFolder}/backend",
+      "django": true,
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "config.settings.dev",
+        "POSTGRES_HOST": "localhost"
+      },
+      "justMyCode": false
+    },
+    {
+      "name": "Django: pytest (current file)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": ["${relativeFile}"],
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "DJANGO_SETTINGS_MODULE": "config.settings.test"
+      }
+    },
+    {
+      "name": "Frontend: Vite dev",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend/src",
+      "preLaunchTask": "dev-frontend"
+    }
+  ]
+}
