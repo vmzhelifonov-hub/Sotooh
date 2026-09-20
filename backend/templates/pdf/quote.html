@@ -1,0 +1,213 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<style>
+    @page {
+        size: A4;
+        margin: 18mm 15mm;
+        @bottom-center {
+            content: "{{ quote.quote_number }}";
+            font-family: 'Noto Sans Arabic';
+            font-size: 8pt;
+            color: #888;
+        }
+    }
+    body {
+        font-family: 'Noto Sans Arabic', sans-serif;
+        color: #111111;
+        font-size: 10pt;
+        line-height: 1.6;
+    }
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 2px solid #111111;
+        padding-bottom: 14px;
+        margin-bottom: 22px;
+    }
+    .logo img { max-height: 64px; max-width: 180px; }
+    .doc-title {
+        font-size: 22pt;
+        font-weight: bold;
+        color: #111111;
+        text-align: left;
+    }
+    .doc-title .gold { color: #B89A5A; }
+    .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .meta-table td { padding: 3px 6px; vertical-align: top; }
+    .meta-label { color: #555555; font-size: 9pt; }
+    .quote-num { font-size: 12pt; font-weight: bold; }
+    h2.section {
+        font-size: 11pt;
+        color: #111111;
+        border-right: 4px solid #B89A5A;
+        padding-right: 8px;
+        margin: 18px 0 8px 0;
+    }
+    table.items {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 16px;
+    }
+    table.items th {
+        background: #1B1B1B;
+        color: #F5F5F5;
+        padding: 7px 8px;
+        font-size: 9pt;
+        text-align: right;
+    }
+    table.items td {
+        padding: 7px 8px;
+        border-bottom: 1px solid #DDD;
+        font-size: 9.5pt;
+        vertical-align: top;
+    }
+    table.items tr:nth-child(even) td { background: #F7F6F2; }
+    .num { direction: ltr; text-align: left; font-family: 'Noto Sans Arabic', sans-serif; }
+    .totals { margin-right: auto; width: 55%; margin-top: 8px; }
+    .totals td { padding: 5px 8px; font-size: 10pt; }
+    .totals .grand td {
+        background: #1B1B1B;
+        color: #FFFFFF;
+        font-weight: bold;
+        font-size: 12pt;
+        padding: 9px 8px;
+    }
+    .totals .grand .gold { color: #D6BC7E; }
+    .notes-block {
+        background: #F7F6F2;
+        border-right: 3px solid #B89A5A;
+        padding: 10px 12px;
+        font-size: 9.5pt;
+        margin-bottom: 12px;
+    }
+    .footer {
+        margin-top: 26px;
+        border-top: 1px solid #CCC;
+        padding-top: 10px;
+        font-size: 8.5pt;
+        color: #555555;
+        display: flex;
+        justify-content: space-between;
+    }
+    .brandmark { color: #B89A5A; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">
+        {% if org.logo %}
+            <img src="{{ org.logo.url }}" alt="logo">
+        {% else %}
+            <div style="font-size:16pt;font-weight:bold;">{{ org.company_name_ar|default:org.company_name }}</div>
+        {% endif %}
+    </div>
+    <div class="doc-title">
+        عرض سعر<br>
+        <span class="gold" style="font-size:11pt;">Commercial Offer</span>
+    </div>
+</div>
+
+<table class="meta-table">
+    <tr>
+        <td class="meta-label">رقم العرض</td>
+        <td class="quote-num num">{{ quote.quote_number }}</td>
+        <td class="meta-label">التاريخ</td>
+        <td>{{ issue_date|date:"Y/m/d" }}</td>
+    </tr>
+    <tr>
+        <td class="meta-label">اسم العميل</td>
+        <td>{{ quote.customer.name }}</td>
+        <td class="meta-label">صالح حتى</td>
+        <td>{% if valid_until %}{{ valid_until|date:"Y/m/d" }}{% else %}—{% endif %}</td>
+    </tr>
+    <tr>
+        <td class="meta-label">هاتف العميل</td>
+        <td class="num">{{ quote.customer.phone }}</td>
+        <td class="meta-label">المدينة</td>
+        <td>{{ quote.customer.city|default:"—" }}</td>
+    </tr>
+</table>
+
+<h2 class="section">تفاصيل المنتجات والخدمات</h2>
+
+<table class="items">
+    <thead>
+        <tr>
+            <th style="width:5%;">#</th>
+            <th style="width:35%;">الوصف</th>
+            <th style="width:18%;">الماركة / الموديل</th>
+            <th style="width:8%;">الكمية</th>
+            <th style="width:8%;">الوحدة</th>
+            <th style="width:13%;">سعر الوحدة (دينار)</th>
+            <th style="width:13%;">المجموع (دينار)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ item.description }}</td>
+            <td>{{ item.brand_model|default:"—" }}</td>
+            <td class="num">{{ item.quantity }}</td>
+            <td>{{ item.unit }}</td>
+            <td class="num">{{ money(item.unit_price) }}</td>
+            <td class="num"><strong>{{ money(item.line_total) }}</strong></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<table class="totals">
+    <tr>
+        <td>المجموع الفرعي</td>
+        <td class="num">{{ money(quote.subtotal) }} د.ع</td>
+    </tr>
+    {% if quote.discount_amount > 0 or quote.discount_percent > 0 %}
+    <tr>
+        <td>الخصم</td>
+        <td class="num">-{{ money(quote.discount_amount) }} د.ع</td>
+    </tr>
+    {% endif %}
+    {% if quote.tax_percent > 0 %}
+    <tr>
+        <td>الضريبة ({{ quote.tax_percent }}%)</td>
+        <td class="num">{{ money(quote.tax_amount) }} د.ع</td>
+    </tr>
+    {% endif %}
+    <tr class="grand">
+        <td>المجموع النهائي</td>
+        <td class="num gold">{{ money(quote.total) }} د.ع</td>
+    </tr>
+</table>
+
+{% if quote.notes_ar %}
+<h2 class="section">ملاحظات</h2>
+<div class="notes-block">{{ quote.notes_ar|linebreaksbr }}</div>
+{% endif %}
+
+{% if quote.payment_terms %}
+<h2 class="section">شروط الدفع</h2>
+<div class="notes-block">{{ quote.payment_terms|linebreaksbr }}</div>
+{% endif %}
+
+{% if quote.delivery_terms %}
+<h2 class="section">شروط التوصيل والتركيب</h2>
+<div class="notes-block">{{ quote.delivery_terms|linebreaksbr }}</div>
+{% endif %}
+
+<div class="footer">
+    <div>
+        {% if org.phone %}📞 {{ org.phone }}{% endif %}
+        {% if org.email %} &nbsp;✉ {{ org.email }}{% endif %}
+        {% if org.address %}{% if org.city %} &nbsp;📍 {{ org.city }}{% endif %}{% endif %}
+    </div>
+    <div><span class="brandmark">Sotooh</span> · سطوع</div>
+</div>
+
+</body>
+</html>
