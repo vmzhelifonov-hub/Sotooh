@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { customerApi, productApi, quoteApi, type QuoteItem } from "../api/endpoints";
+import { customerApi, productApi, quoteApi } from "../api/endpoints";
 import { extractApiError } from "../api/client";
 import { AppShell } from "../components/layout/AppShell";
 import { Button } from "../components/ui/Button";
@@ -79,7 +79,7 @@ export default function QuoteDetailPage() {
 
   const { data: products } = useQuery({
     queryKey: ["products-all"],
-    queryFn: () => productApi.list({ page: 1, page_size: "100" }).then((r) => r.results),
+    queryFn: () => productApi.list({ page: 1 }).then((r) => r.results),
     enabled: isNew || existing?.status === "draft",
   });
 

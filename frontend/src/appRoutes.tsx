@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Route, Routes as RouterRoutes } from "react-router-dom";
 import DashboardPage from "./pages/DashboardPage";
 import CustomersPage from "./pages/CustomersPage";
 import ProductsPage from "./pages/ProductsPage";
@@ -8,10 +8,10 @@ import SettingsPage from "./pages/SettingsPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import { AppShell } from "./components/layout/AppShell";
 
-export function Routes() {
+export function AppRoutes() {
   return (
     <AppShell>
-      <Routes>
+      <RouterRoutes>
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="products" element={<ProductsPage />} />
@@ -19,8 +19,8 @@ export function Routes() {
         <Route path="quotes/:id" element={<QuoteDetailPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="onboarding" element={<OnboardingPage />} />
-        <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
-      </Routes>
+        <Route path="*" element={<DashboardPage />} />
+      </RouterRoutes>
     </AppShell>
   );
 }

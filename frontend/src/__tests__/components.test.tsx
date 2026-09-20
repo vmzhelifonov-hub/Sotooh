@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { LandingPage } from "../pages/LandingPage";
+import LandingPage from "../pages/LandingPage";
 import { ToastProvider } from "../providers/ToastProvider";
 import { AuthProvider } from "../providers/AuthProvider";
 

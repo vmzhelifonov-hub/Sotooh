@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { customerApi, orgApi, productApi, quoteApi, type Organization } from "../api/endpoints";
@@ -16,7 +16,7 @@ export default function OnboardingPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState(0);
-  const [org, setOrg] = useState<Organization | null>(null);
+  const [, setOrg] = useState<Organization | null>(null);
   const [loading, setLoading] = useState(false);
 
   // company step state
@@ -162,7 +162,7 @@ export default function OnboardingPage() {
           ))}
         </div>
         <div className="onboarding__step-label">
-          {t("onboarding.step")} {step + 1} {t("onboarding.of")} 4 — {t(`onboarding.${STEPS[step]}`)}
+          {t("onboarding.step")} {step + 1} {t("onboarding.of")} 4 вЂ” {t(`onboarding.${STEPS[step]}`)}
         </div>
 
         {step === 0 && (
@@ -171,7 +171,7 @@ export default function OnboardingPage() {
             <Field label={t("auth.company_name")} id="ob-company" required>
               <Input id="ob-company" value={companyName} onChange={(e) => setCompanyName(e.target.value)} />
             </Field>
-            <Field label={t("products.name_ar") + " (الشركة)"} id="ob-company-ar">
+            <Field label={t("products.name_ar") + " (Ш§Щ„ШґШ±ЩѓШ©)"} id="ob-company-ar">
               <Input id="ob-company-ar" value={companyNameAr} onChange={(e) => setCompanyNameAr(e.target.value)} />
             </Field>
             <Field label={t("onboarding.city")} id="ob-city">

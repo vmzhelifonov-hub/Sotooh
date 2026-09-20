@@ -1,10 +1,9 @@
-import { useTranslation } from "react-i18next";
+﻿import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { publicQuoteApi } from "../api/endpoints";
 import { Card, EmptyState, Spinner } from "../components/ui/DataDisplay";
 import { formatMoney } from "../components/ui/Field";
-import { Button } from "../components/ui/Button";
 import "./publicQuote.css";
 
 interface PublicQuoteData {
@@ -37,7 +36,7 @@ export default function PublicQuotePage() {
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["public-quote", token],
-    queryFn: () => publicQuoteApi.get(token!) as Promise<PublicQuoteData>,
+    queryFn: () => publicQuoteApi.get(token!) as unknown as Promise<PublicQuoteData>,
     retry: false,
   });
 
@@ -52,7 +51,7 @@ export default function PublicQuotePage() {
   if (isError || !data) {
     return (
       <div className="public-page">
-        <EmptyState title={t("public.not_found")} icon="✕" />
+        <EmptyState title={t("public.not_found")} icon="вњ•" />
       </div>
     );
   }
@@ -69,7 +68,7 @@ export default function PublicQuotePage() {
             )}
           </div>
           <div className="public-doc__title">
-            عرض سعر
+            Ш№Ш±Ш¶ ШіШ№Ш±
             <span className="public-doc__subtitle">Commercial Offer</span>
           </div>
         </header>
@@ -86,7 +85,7 @@ export default function PublicQuotePage() {
               <td className="public-meta__label">{t("public.prepared_for")}</td>
               <td className="public-meta__strong">{data.customer_name}</td>
               <td className="public-meta__label">{t("public.valid_until")}</td>
-              <td>{data.valid_until ? new Date(data.valid_until).toLocaleDateString("ar-IQ") : "—"}</td>
+              <td>{data.valid_until ? new Date(data.valid_until).toLocaleDateString("ar-IQ") : "вЂ”"}</td>
             </tr>
           </tbody>
         </table>
@@ -108,7 +107,7 @@ export default function PublicQuotePage() {
               <tr key={i}>
                 <td>{i + 1}</td>
                 <td>{item.description}</td>
-                <td dir="ltr">{item.brand_model || "—"}</td>
+                <td dir="ltr">{item.brand_model || "вЂ”"}</td>
                 <td dir="ltr">{item.quantity}</td>
                 <td>{item.unit}</td>
                 <td dir="ltr">{formatMoney(item.unit_price, data.currency)}</td>
@@ -172,7 +171,7 @@ export default function PublicQuotePage() {
             {data.company_city && <p>{data.company_city}</p>}
           </div>
           <div className="public-footer__brand">
-            {t("public.powered_by")} <span className="brand-gold">Sotooh</span> · سطوع
+            {t("public.powered_by")} <span className="brand-gold">Sotooh</span> В· ШіШ·Щ€Ш№
           </div>
         </footer>
       </Card>

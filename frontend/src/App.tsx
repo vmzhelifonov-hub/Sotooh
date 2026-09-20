@@ -7,15 +7,9 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-import OnboardingPage from "./pages/OnboardingPage";
-import DashboardPage from "./pages/DashboardPage";
-import CustomersPage from "./pages/CustomersPage";
-import ProductsPage from "./pages/ProductsPage";
-import QuotesPage from "./pages/QuotesPage";
-import QuoteDetailPage from "./pages/QuoteDetailPage";
-import SettingsPage from "./pages/SettingsPage";
 import PublicQuotePage from "./pages/PublicQuotePage";
 import { Spinner } from "./components/ui/DataDisplay";
+import { AppRoutes } from "./appRoutes";
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -25,7 +19,7 @@ function Protected({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function AppRoutes() {
+function AppRoutesWrapper() {
   return (
     <>
       <Routes>
@@ -37,18 +31,10 @@ function AppRoutes() {
         <Route path="/q/:token" element={<PublicQuotePage />} />
 
         <Route
-          path="/onboarding"
-          element={
-            <Protected>
-              <OnboardingPage />
-            </Protected>
-          }
-        />
-        <Route
           path="/app/*"
           element={
             <Protected>
-              <AppLayout />
+              <AppRoutes />
             </Protected>
           }
         />
@@ -59,20 +45,12 @@ function AppRoutes() {
   );
 }
 
-import { Routes as LayoutRoutes } from "./appRoutes";
-
-function AppLayout() {
-  return <LayoutRoutes />;
-}
-
 export default function App() {
   return (
     <ToastProvider>
       <AuthProvider>
-        <AppRoutes />
+        <AppRoutesWrapper />
       </AuthProvider>
     </ToastProvider>
   );
 }
-
-export { DashboardPage, CustomersPage, ProductsPage, QuotesPage, QuoteDetailPage, SettingsPage, OnboardingPage };

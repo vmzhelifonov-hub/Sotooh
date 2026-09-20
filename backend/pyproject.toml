@@ -11,7 +11,7 @@ dependencies = [
     "django-cors-headers==4.4.*",
     "django-filter==24.3",
     "drf-spectacular==0.28.*",
-    "django-storages[s3]==1.2",
+    "django-storages[s3]==1.14.*",
     "Pillow>=10.4",
     "psycopg[binary]==3.2.*",
     "gunicorn==23.*",
@@ -24,13 +24,13 @@ dependencies = [
     "django-redis>=5.4",
     "shortuuid>=1.0.13",
     "pytz>=2024.1",
-    "django-environ>=0.2",
+    "django-environ>=0.11.2",
     "user-agents>=2.2",
 ]
 [dependency-groups]
 dev = [
     "pytest==8.*",
-    "pytest-django@4.9.*",
+    "pytest-django==4.9.*",
     "factory-boy==3.3",
     "ruff==0.6.*",
     "mypy>=1.11",

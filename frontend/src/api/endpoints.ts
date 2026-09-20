@@ -108,6 +108,7 @@ export interface Quote {
   first_viewed_at: string | null;
   last_viewed_at: string | null;
   view_count: number;
+  created_at: string;
 }
 
 export interface Paginated<T> {
