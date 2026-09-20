@@ -1,0 +1,49 @@
+.quote-title-row { display: flex; align-items: center; gap: 12px; }
+.quote-header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.frozen-note {
+  background: rgba(184, 154, 90, 0.1);
+  border: 1px solid rgba(184, 154, 90, 0.3);
+  color: #8a6f35;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  margin-bottom: 14px;
+}
+.quote-layout { display: grid; grid-template-columns: 1fr 320px; gap: 14px; align-items: start; }
+@media (max-width: 960px) {
+  .quote-layout { grid-template-columns: 1fr; }
+}
+.items-heading { margin: 18px 0 10px; font-size: 0.95rem; }
+.totals-heading { margin: 0 0 12px; font-size: 0.95rem; }
+
+.quote-item { margin-bottom: 12px; }
+.quote-item__row { display: flex; flex-direction: column; gap: 8px; background: #faf9f6; border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+.quote-item__product { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.quote-item__product .select { grid-column: 1 / -1; }
+.quote-item__nums { display: grid; grid-template-columns: 80px 80px 1fr auto auto; gap: 8px; align-items: center; }
+.quote-item__total { font-weight: 700; min-width: 100px; text-align: end; }
+.quote-item__ops { display: flex; gap: 2px; }
+@media (max-width: 700px) {
+  .quote-item__product { grid-template-columns: 1fr; }
+  .quote-item__nums { grid-template-columns: 1fr 1fr; }
+}
+
+.quote-terms { margin-top: 16px; }
+
+.totals-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
+.totals-grand { border-bottom: none; font-size: 1.05rem; }
+.totals-grand strong { color: var(--gold); font-size: 1.2rem; }
+.totals-inputs { margin: 10px 0; }
+
+.share-url {
+  background: #f4f2ec;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+  word-break: break-all;
+  margin-bottom: 10px;
+}
+.share-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.wa-btn { display: block; margin-top: 8px; }
+.wa-btn .btn { width: 100%; }
+.views-meta { margin-top: 12px; font-size: 0.8rem; color: #777; }

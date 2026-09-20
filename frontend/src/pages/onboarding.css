@@ -1,0 +1,18 @@
+.onboarding { max-width: 560px; margin: 0 auto; }
+.onboarding h1 { text-align: center; font-size: 1.35rem; margin: 0 0 18px; }
+.onboarding__progress { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.onboarding__dot {
+  width: 34px; height: 5px;
+  border-radius: 3px;
+  background: var(--border);
+}
+.onboarding__dot.active { background: var(--gold); }
+.onboarding__step-label { text-align: center; color: #777; font-size: 0.85rem; margin-bottom: 22px; }
+.onboarding__card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px;
+}
+.onboarding__hint { color: #666; font-size: 0.88rem; margin-top: 0; }
+.onboarding__actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; }

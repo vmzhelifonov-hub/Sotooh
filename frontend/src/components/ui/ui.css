@@ -1,0 +1,220 @@
+/* Design system — Sotooh (black / charcoal / off-white / muted gold) */
+
+/* ------------------------------------------------------------ buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn--sm { padding: 6px 12px; font-size: 0.8rem; }
+.btn--md { padding: 9px 18px; font-size: 0.9rem; }
+.btn--lg { padding: 13px 26px; font-size: 1rem; }
+
+.btn--primary { background: var(--bg-dark); color: var(--text-light); }
+.btn--primary:hover:not(:disabled) { background: var(--charcoal-2); }
+
+.btn--secondary { background: transparent; color: var(--text-dark); border-color: var(--border); }
+.btn--secondary:hover:not(:disabled) { border-color: var(--bg-dark); }
+
+.btn--gold { background: var(--gold); color: #fff; }
+.btn--gold:hover:not(:disabled) { background: var(--gold-soft); }
+
+.btn--danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+.btn--danger:hover:not(:disabled) { background: var(--danger); color: #fff; }
+
+.btn--ghost { background: transparent; color: var(--text-dark); }
+.btn--ghost:hover:not(:disabled) { background: rgba(0, 0, 0, 0.05); }
+
+.btn__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ------------------------------------------------------------ fields */
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field__label { font-size: 0.82rem; font-weight: 600; color: var(--charcoal-2); }
+.field__req { color: var(--gold); }
+.field__error { font-size: 0.78rem; color: var(--danger); }
+.field--error .input { border-color: var(--danger); }
+
+.input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.92rem;
+  background: #fff;
+  color: var(--text-dark);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(184, 154, 90, 0.15);
+}
+.textarea { resize: vertical; }
+.select { appearance: auto; }
+
+.money-input { position: relative; display: flex; align-items: center; }
+.money-input .input { padding-left: 44px; }
+.money-input__suffix {
+  position: absolute;
+  inset-inline-start: 12px;
+  font-size: 0.78rem;
+  color: #999;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------ card */
+.card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.card__title { margin: 0; font-size: 1rem; font-weight: 700; }
+
+/* ------------------------------------------------------------ badge */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.badge--neutral { background: #eeece6; color: #555; }
+.badge--gold { background: rgba(184, 154, 90, 0.15); color: #8a6f35; }
+.badge--success { background: rgba(62, 125, 82, 0.14); color: var(--success); }
+.badge--danger { background: rgba(179, 69, 58, 0.12); color: var(--danger); }
+.badge--dark { background: var(--bg-dark); color: var(--text-light); }
+
+/* ------------------------------------------------------------ table */
+.table-wrap { overflow-x: auto; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.table th {
+  text-align: start;
+  padding: 10px 12px;
+  background: var(--charcoal-1);
+  color: var(--text-light);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.table tr:hover td { background: #faf9f6; }
+
+/* ------------------------------------------------------------ empty / spinner */
+.empty-state {
+  text-align: center;
+  padding: 48px 16px;
+  color: #888;
+}
+.empty-state__icon { font-size: 2rem; margin-bottom: 10px; color: var(--gold); }
+
+.spinner-wrap { display: flex; align-items: center; gap: 10px; padding: 32px; color: #888; }
+.spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid var(--border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ------------------------------------------------------------ pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: center;
+  padding: 14px 0 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* ------------------------------------------------------------ dialog */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 17, 17, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  z-index: 100;
+  overflow-y: auto;
+}
+.dialog {
+  background: #fff;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+}
+.dialog--wide { max-width: 760px; }
+.dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 0;
+}
+.dialog__header h2 { margin: 0; font-size: 1.1rem; }
+.dialog__close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #888;
+  padding: 4px 8px;
+}
+.dialog__close:hover { color: var(--text-dark); }
+.dialog__body { padding: 16px 22px 22px; }
+
+/* ------------------------------------------------------------ toasts */
+.toasts {
+  position: fixed;
+  bottom: 20px;
+  inset-inline-start: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 200;
+}
+.toast {
+  padding: 11px 18px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.88rem;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  animation: toast-in 0.25s ease;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.toast--success { background: var(--success); }
+.toast--error { background: var(--danger); }
+.toast--info { background: var(--charcoal-2); }
