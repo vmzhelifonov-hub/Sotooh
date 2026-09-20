@@ -1,10 +1,56 @@
-# Python-generated files
+# --- Python / Django ---
 __pycache__/
-*.py[oc]
-build/
-dist/
-wheels/
-*.egg-info
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
+staticfiles/
+media/
 
-# Virtual environments
-.venv
+# --- Node / Frontend ---
+node_modules/
+dist/
+.vite/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# --- Env & secrets ---
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# --- Data volumes / infra ---
+docker-data/
+volumes/
+.minio/
+.s3cfg
+
+# --- Airflow ---
+airflow/logs/
+airflow/plugins/
+airflow/*.db
+
+# --- IDE / OS ---
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/tasks.json
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# --- Misc ---
+*.local
+*.log

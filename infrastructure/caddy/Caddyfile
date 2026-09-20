@@ -1,0 +1,22 @@
+{$DOMAIN} {
+	# Backend: Django API + admin + health
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+	handle /admin* {
+		reverse_proxy backend:8000
+	}
+	handle /health* {
+		reverse_proxy backend:8000
+	}
+	handle /static/* {
+		reverse_proxy backend:8000
+	}
+
+	# Frontend: everything else (SPA with client-side routing)
+	handle {
+		reverse_proxy frontend:80
+	}
+
+	encode gzip
+}
