@@ -1,8 +1,9 @@
 """Product catalog model — installer-managed prices, no engineering advice."""
+
 from django.db import models
 from django.utils.text import get_valid_filename
 
-from apps.core.models import OrganizationScopedModel, UUIDModel
+from apps.core.models import OrganizationScopedModel
 
 
 def product_image_path(instance, filename):
@@ -31,7 +32,9 @@ class ProductType(models.TextChoices):
 class Product(OrganizationScopedModel):
     """A product or service the installer sells. Prices are owner-defined."""
 
-    organization = models.ForeignKey("accounts.Organization", on_delete=models.CASCADE, related_name="products")
+    organization = models.ForeignKey(
+        "accounts.Organization", on_delete=models.CASCADE, related_name="products"
+    )
     type = models.CharField(max_length=12, choices=ProductType.choices, default=ProductType.PRODUCT)
     category = models.CharField(max_length=20, choices=Category.choices, default=Category.OTHER)
     brand = models.CharField(max_length=120, blank=True)
@@ -57,7 +60,11 @@ class Product(OrganizationScopedModel):
             models.Index(fields=["organization", "category"]),
         ]
         constraints = [
-            models.UniqueConstraint(fields=["organization", "sku"], condition=~models.Q(sku=""), name="uniq_org_sku"),
+            models.UniqueConstraint(
+                fields=["organization", "sku"],
+                condition=~models.Q(sku=""),
+                name="uniq_org_sku",
+            ),
         ]
 
     def __str__(self) -> str:

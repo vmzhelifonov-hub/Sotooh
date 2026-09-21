@@ -1,4 +1,5 @@
 """Public quote link: token security, revocation, view tracking, data exposure."""
+
 import pytest
 from django.urls import reverse
 
@@ -8,10 +9,14 @@ from apps.quotations.models import Quote
 pytestmark = pytest.mark.django_db
 
 
-def _quote_with_share(org, customer, notes="внутренняя заметка"):
+def _quote_with_share(org, customer, notes="ملاحظة للعميل"):
     q = Quote.objects.create(
-        organization=org, customer=customer, quote_number="STH-2026-09999",
-        notes_ar=notes, total=1000, subtotal=1000,
+        organization=org,
+        customer=customer,
+        quote_number="STH-2026-09999",
+        notes_ar=notes,
+        total=1000,
+        subtotal=1000,
     )
     q.ensure_share_token()
     q.share_enabled = True
@@ -32,11 +37,16 @@ class TestPublicQuote:
 
     def test_no_internal_data_leak(self, client, org_a):
         customer = Customer.objects.create(organization=org_a, name="كليم", phone="+9647700000000")
-        quote = _quote_with_share(org_a, customer, notes="هامش الربح 40%")
+        quote = _quote_with_share(org_a, customer, notes="هامش الربح")
         response = client.get(reverse("public-quote", args=[quote.share_token]))
         text = response.content.decode()
-        assert "هامش" not in text  # Arabic CRM notes not exposed via notes_ar? notes_ar IS customer-facing; check other fields
-        for forbidden in ("cost_price", "assigned_user", "lost_reason", "created_by", "organization_id"):
+        for forbidden in (
+            "cost_price",
+            "assigned_user",
+            "lost_reason",
+            "created_by",
+            "organization_id",
+        ):
             assert forbidden not in text
 
     def test_revoked_token_404(self, client, org_a):

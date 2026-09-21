@@ -3,6 +3,7 @@
 The SaaS must never fail because of analytics: all tracking is fire-and-forget,
 wrapped in try/except at the call sites' service boundary.
 """
+
 import logging
 
 from . import clickhouse

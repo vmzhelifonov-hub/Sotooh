@@ -1,4 +1,5 @@
 """Ensure ClickHouse events schema exists. Safe to run anytime."""
+
 from django.core.management.base import BaseCommand
 
 from apps.analytics import clickhouse

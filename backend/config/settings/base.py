@@ -3,11 +3,12 @@ Base settings shared across environments.
 Environment-specific settings (dev / test / prod) import from here.
 All secrets/config come from environment variables — never hardcode.
 """
+
 from pathlib import Path
 import os
-from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
 
 # ---------------------------------------------------------------- env vars
 def env(name: str, default: str = "") -> str:
@@ -27,8 +28,12 @@ def env_int(name: str, default: int = 0) -> int:
 
 SECRET_KEY = env("DJANGO_SECRET_KEY", "dev-only-insecure-secret-change-me")
 DEBUG = env_bool("DJANGO_DEBUG", False)
-ALLOWED_HOSTS = [h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,backend").split(",") if h.strip()]
-CSRF_TRUSTED_ORIGINS = [o.strip() for o in env("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
+ALLOWED_HOSTS = [
+    h.strip() for h in env("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,backend").split(",") if h.strip()
+]
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in env("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",") if o.strip()
+]
 
 # --------------------------------------------------------------- apps
 DJANGO_APPS = [
@@ -121,7 +126,10 @@ PASSWORD_HASHERS = [
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 8}},
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
@@ -202,7 +210,9 @@ SPECTACULAR_SETTINGS = {
 }
 
 # -------------------------------------------------------------- CORS
-CORS_ALLOWED_ORIGINS = [o.strip() for o in env("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",") if o.strip()]
+CORS_ALLOWED_ORIGINS = [
+    o.strip() for o in env("DJANGO_CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",") if o.strip()
+]
 CORS_ALLOW_CREDENTIALS = True
 
 # ------------------------------------------------------------- Celery
@@ -252,14 +262,6 @@ LOGGING = {
     "formatters": {
         "json": {
             "()": "apps.core.logging.JSONFormatter",
-            "format_dict": {
-                "timestamp": "asctime",
-                "level": "levelname",
-                "message": "message",
-                "request_id": "request_id",
-                "user_id": "user_id",
-                "organization_id": "organization_id",
-            },
         },
     },
     "filters": {

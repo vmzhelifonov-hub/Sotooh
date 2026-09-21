@@ -1,4 +1,5 @@
 """CRM serializers."""
+
 from rest_framework import serializers
 
 from .models import Customer, FollowUp, LeadSource, Stage
@@ -41,7 +42,9 @@ class CustomerSerializer(serializers.ModelSerializer):
             stage = attrs.get("stage", getattr(self.instance, "stage", None))
             lost_reason = attrs.get("lost_reason", getattr(self.instance, "lost_reason", ""))
             if stage == Stage.LOST and not (lost_reason or "").strip():
-                raise serializers.ValidationError({"lost_reason": "Lost reason is required when stage is lost."})
+                raise serializers.ValidationError(
+                    {"lost_reason": "Lost reason is required when stage is lost."}
+                )
         return attrs
 
 
@@ -50,7 +53,15 @@ class FollowUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FollowUp
-        fields = ["id", "customer", "customer_name", "note", "scheduled_for", "completed_at", "created_at"]
+        fields = [
+            "id",
+            "customer",
+            "customer_name",
+            "note",
+            "scheduled_for",
+            "completed_at",
+            "created_at",
+        ]
         read_only_fields = ["id", "completed_at", "created_at", "customer_name"]
 
 
@@ -60,5 +71,5 @@ class FollowUpBucketCountsSerializer(serializers.Serializer):
     upcoming = serializers.IntegerField()
 
 
-LEAD_SOURCE_CHOICES = [{"value": v, "label": l} for v, l in LeadSource.choices]
-STAGE_CHOICES = [{"value": v, "label": l} for v, l in Stage.choices]
+LEAD_SOURCE_CHOICES = [{"value": v, "label": lbl} for v, lbl in LeadSource.choices]
+STAGE_CHOICES = [{"value": v, "label": lbl} for v, lbl in Stage.choices]

@@ -1,4 +1,5 @@
 """Customers/leads + follow-up scheduling."""
+
 from django.db import models
 
 from apps.core.models import OrganizationScopedModel
@@ -25,7 +26,9 @@ class Stage(models.TextChoices):
 
 
 class Customer(OrganizationScopedModel):
-    organization = models.ForeignKey("accounts.Organization", on_delete=models.CASCADE, related_name="customers")
+    organization = models.ForeignKey(
+        "accounts.Organization", on_delete=models.CASCADE, related_name="customers"
+    )
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=32)
     secondary_phone = models.CharField(max_length=32, blank=True)
@@ -37,7 +40,11 @@ class Customer(OrganizationScopedModel):
     stage = models.CharField(max_length=16, choices=Stage.choices, default=Stage.NEW, db_index=True)
     lost_reason = models.CharField(max_length=255, blank=True)
     assigned_user = models.ForeignKey(
-        "accounts.User", null=True, blank=True, on_delete=models.SET_NULL, related_name="assigned_customers"
+        "accounts.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="assigned_customers",
     )
     next_follow_up = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -57,7 +64,9 @@ class Customer(OrganizationScopedModel):
 class FollowUp(OrganizationScopedModel):
     """Activity history for a customer."""
 
-    organization = models.ForeignKey("accounts.Organization", on_delete=models.CASCADE, related_name="follow_ups")
+    organization = models.ForeignKey(
+        "accounts.Organization", on_delete=models.CASCADE, related_name="follow_ups"
+    )
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="follow_ups")
     user = models.ForeignKey("accounts.User", null=True, on_delete=models.SET_NULL, related_name="follow_ups")
     note = models.TextField(blank=True)

@@ -1,5 +1,7 @@
 """PDF generation test — Arabic rendering through WeasyPrint (skipped if unavailable)."""
+
 import pytest
+from decimal import Decimal
 
 pytestmark = pytest.mark.django_db
 
@@ -11,19 +13,34 @@ except (ImportError, OSError):
 
 
 class TestPDF:
-    @pytest.mark.skipif(not weasyprint_available, reason="WeasyPrint/Pango not installed in this environment")
+    @pytest.mark.skipif(
+        not weasyprint_available,
+        reason="WeasyPrint/Pango not installed in this environment",
+    )
     def test_arabic_pdf_renders(self, org_a):
         from apps.crm.models import Customer
         from apps.quotations.models import Quote, QuoteItem
         from apps.quotations.services import render_quote_pdf
 
-        customer = Customer.objects.create(organization=org_a, name="أحمد الكرخي", phone="+9647701234567", city="بغداد")
-        quote = Quote.objects.create(
-            organization=org_a, customer=customer, quote_number="STH-2026-00042",
-            notes_ar="الأسعار تشمل التركيب.", payment_terms="دفع مقدمن 50%",
+        customer = Customer.objects.create(
+            organization=org_a, name="أحمد الكرخي", phone="+9647701234567", city="بغداد"
         )
-        item = QuoteItem(organization=org_a, quote=quote, description="ألواح شمسية 550 واط",
-                         brand_model="LONGi Hi-MO 6", quantity=4, unit="pcs", unit_price=265000)
+        quote = Quote.objects.create(
+            organization=org_a,
+            customer=customer,
+            quote_number="STH-2026-00042",
+            notes_ar="الأسعار تشمل التركيب.",
+            payment_terms="دفع مقدمن 50%",
+        )
+        item = QuoteItem(
+            organization=org_a,
+            quote=quote,
+            description="ألواح شمسية 550 واط",
+            brand_model="LONGi Hi-MO 6",
+            quantity=4,
+            unit="pcs",
+            unit_price=Decimal("265000.00"),
+        )
         item.line_total = item.compute_line_total()
         item.save()
         quote.recalculate()

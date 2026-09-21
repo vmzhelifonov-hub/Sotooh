@@ -1,4 +1,5 @@
 """Analytics URL routes (staff-only)."""
+
 from django.urls import path
 
 from . import views

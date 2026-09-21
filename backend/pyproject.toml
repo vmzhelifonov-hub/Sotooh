@@ -18,8 +18,9 @@ dependencies = [
     "celery==5.4.*",
     "redis==5.0.*",
     "clickhouse-connect==0.7.*",
-    "weasyprint==62.*",
+    "weasyprint>=63,<66",
     "python-dotenv>=1.0",
+    "requests>=2.32",
     "django-ratelimit==4.1",
     "django-redis>=5.4",
     "shortuuid>=1.0.13",
@@ -42,6 +43,13 @@ requires = ["uv_build>=0.12.3,<0.13.0"]
 build-backend = "uv_build"
 [tool.uv]
 package = false
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+[tool.ruff.lint.per-file-ignores]
+# Django settings modules intentionally use star imports from base settings
+"config/settings/*" = ["F401", "F403", "F405"]
+"apps/core/dashboard.py" = ["F401"]
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings.test"
 python_files = ["test_*.py"]

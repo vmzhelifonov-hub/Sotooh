@@ -1,8 +1,14 @@
 """Quotation views: CRUD, PDF, share link, public quote."""
+
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import status, viewsets
-from rest_framework.decorators import action, api_view, permission_classes, throttle_classes
+from rest_framework.decorators import (
+    action,
+    api_view,
+    permission_classes,
+    throttle_classes,
+)
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -72,6 +78,7 @@ class QuoteViewSet(OrganizationQuerysetMixin, viewsets.ModelViewSet):
                 organization=request.user.organization,
                 created_by=request.user,
                 quote_number=services.generate_quote_number(request.user.organization),
+                customer=customer,
                 currency=request.user.organization.currency,
                 issue_date=data.get("issue_date", timezone.localdate()),
                 valid_until=data.get("valid_until"),
@@ -88,8 +95,12 @@ class QuoteViewSet(OrganizationQuerysetMixin, viewsets.ModelViewSet):
             quote.recalculate()
 
         track_event(
-            "quote_created", organization_id=request.user.organization.id, user_id=request.user.id,
-            entity_type="quote", entity_id=quote.id, request=request,
+            "quote_created",
+            organization_id=request.user.organization.id,
+            user_id=request.user.id,
+            entity_type="quote",
+            entity_id=quote.id,
+            request=request,
         )
         return Response(QuoteDetailSerializer(quote).data, status=status.HTTP_201_CREATED)
 
@@ -132,16 +143,28 @@ class QuoteViewSet(OrganizationQuerysetMixin, viewsets.ModelViewSet):
 
         if new_status == QuoteStatus.SENT:
             quote.mark_sent()
-            track_event("quote_sent", organization_id=org_id, user_id=user_id,
-                        entity_type="quote", entity_id=quote.id, request=request)
+            track_event(
+                "quote_sent",
+                organization_id=org_id,
+                user_id=user_id,
+                entity_type="quote",
+                entity_id=quote.id,
+                request=request,
+            )
         elif new_status == QuoteStatus.WON:
             quote.status = QuoteStatus.WON
             quote.won_at = timezone.now()
             quote.save(update_fields=["status", "won_at", "updated_at"])
             quote.customer.stage = "won"
             quote.customer.save(update_fields=["stage", "updated_at"])
-            track_event("quote_won", organization_id=org_id, user_id=user_id,
-                        entity_type="quote", entity_id=quote.id, request=request)
+            track_event(
+                "quote_won",
+                organization_id=org_id,
+                user_id=user_id,
+                entity_type="quote",
+                entity_id=quote.id,
+                request=request,
+            )
         elif new_status == QuoteStatus.LOST:
             quote.status = QuoteStatus.LOST
             quote.lost_reason = ser.validated_data.get("lost_reason", "")
@@ -149,8 +172,14 @@ class QuoteViewSet(OrganizationQuerysetMixin, viewsets.ModelViewSet):
             quote.customer.stage = "lost"
             quote.customer.lost_reason = quote.lost_reason
             quote.customer.save(update_fields=["stage", "lost_reason", "updated_at"])
-            track_event("quote_lost", organization_id=org_id, user_id=user_id,
-                        entity_type="quote", entity_id=quote.id, request=request)
+            track_event(
+                "quote_lost",
+                organization_id=org_id,
+                user_id=user_id,
+                entity_type="quote",
+                entity_id=quote.id,
+                request=request,
+            )
         else:
             quote.status = new_status
             quote.save(update_fields=["status", "updated_at"])
@@ -165,8 +194,14 @@ class QuoteViewSet(OrganizationQuerysetMixin, viewsets.ModelViewSet):
             services.generate_and_store_pdf(quote)
         except services.PDFGenerationError as exc:
             return Response({"error": {"code": "pdf_failed", "message": str(exc)}}, status=502)
-        track_event("quote_pdf_generated", organization_id=request.user.organization.id, user_id=request.user.id,
-                    entity_type="quote", entity_id=quote.id, request=request)
+        track_event(
+            "quote_pdf_generated",
+            organization_id=request.user.organization.id,
+            user_id=request.user.id,
+            entity_type="quote",
+            entity_id=quote.id,
+            request=request,
+        )
         return Response({"pdf_url": quote.pdf_url})
 
     @action(detail=True, methods=["post"])
@@ -176,8 +211,14 @@ class QuoteViewSet(OrganizationQuerysetMixin, viewsets.ModelViewSet):
         quote.share_enabled = True
         quote.share_revoked_at = None
         quote.save(update_fields=["share_enabled", "share_revoked_at", "share_token"])
-        track_event("quote_shared", organization_id=request.user.organization.id, user_id=request.user.id,
-                    entity_type="quote", entity_id=quote.id, request=request)
+        track_event(
+            "quote_shared",
+            organization_id=request.user.organization.id,
+            user_id=request.user.id,
+            entity_type="quote",
+            entity_id=quote.id,
+            request=request,
+        )
         return Response({"share_url": quote.share_url, "share_enabled": True})
 
     @action(detail=True, methods=["post"])
@@ -235,7 +276,8 @@ def _replace_items(quote: Quote, items_data: list[dict]) -> None:
             quote=quote,
             product=product,
             description=item.get("description") or (product.name_ar if product else ""),
-            brand_model=item.get("brand_model") or (f"{product.brand} {product.model}".strip() if product else ""),
+            brand_model=item.get("brand_model")
+            or (f"{product.brand} {product.model}".strip() if product else ""),
             quantity=item["quantity"],
             unit=item.get("unit", product.unit if product else "pcs"),
             unit_price=item["unit_price"],
@@ -247,6 +289,7 @@ def _replace_items(quote: Quote, items_data: list[dict]) -> None:
 
 
 # ------------------------------------------------------------- public quote
+
 
 @api_view(["GET"])
 @permission_classes([AllowAny])
@@ -275,7 +318,13 @@ def public_quote(request, token: str):
     if quote.first_viewed_at is None:
         quote.first_viewed_at = now
     quote.save(update_fields=["view_count", "first_viewed_at", "last_viewed_at"])
-    track_event("public_quote_viewed", organization_id=quote.organization_id, user_id=None,
-                entity_type="quote", entity_id=quote.id, request=request)
+    track_event(
+        "public_quote_viewed",
+        organization_id=quote.organization_id,
+        user_id=None,
+        entity_type="quote",
+        entity_id=quote.id,
+        request=request,
+    )
 
     return Response(PublicQuoteSerializer(quote).data)

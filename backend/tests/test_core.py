@@ -1,4 +1,5 @@
 """Health endpoints + CRM + analytics degradation."""
+
 import pytest
 from django.urls import reverse
 
@@ -18,11 +19,20 @@ class TestHealth:
 
 class TestCRM:
     def test_customer_crud(self, auth_client_a, org_a):
-        payload = {"name": "أحمد", "phone": "+9647701111111", "city": "بغداد", "source": "whatsapp"}
+        payload = {
+            "name": "أحمد",
+            "phone": "+9647701111111",
+            "city": "بغداد",
+            "source": "whatsapp",
+        }
         response = auth_client_a.post(reverse("customer-list"), payload, format="json")
         assert response.status_code == 201
         cid = response.json()["id"]
-        response = auth_client_a.patch(reverse("customer-detail", args=[cid]), {"stage": "contacted"}, format="json")
+        response = auth_client_a.patch(
+            reverse("customer-detail", args=[cid]),
+            {"stage": "contacted"},
+            format="json",
+        )
         assert response.json()["stage"] == "contacted"
 
     def test_lost_requires_reason(self, auth_client_a):
@@ -36,7 +46,9 @@ class TestCRM:
         from apps.crm.models import Customer
 
         Customer.objects.create(
-            organization=org_a, name="متأخر", phone="+9647700000001",
+            organization=org_a,
+            name="متأخر",
+            phone="+9647700000001",
             next_follow_up=timezone.now() - timezone.timedelta(days=2),
         )
         response = auth_client_a.get(reverse("customer-followup-queue"))

@@ -1,4 +1,5 @@
 """Product CRUD views — always tenant-filtered."""
+
 from rest_framework import viewsets
 
 from apps.core.mixins import OrganizationQuerysetMixin
@@ -30,4 +31,4 @@ from rest_framework.response import Response  # noqa: E402
 @permission_classes([IsAuthenticated])
 def categories(request):
     """Expose catalog category choices for frontend dropdowns."""
-    return Response([{"value": v, "label": l} for v, l in Category.choices])
+    return Response([{"value": v, "label": lbl} for v, lbl in Category.choices])

@@ -4,6 +4,7 @@ Idempotent: skips files that already exist with non-zero size.
 Fonts: Noto Sans Arabic, Noto Naskh Arabic (headings fallback), Inter.
 All under OFL license.
 """
+
 from pathlib import Path
 
 import requests

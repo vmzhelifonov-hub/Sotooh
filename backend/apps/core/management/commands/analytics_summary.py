@@ -1,4 +1,5 @@
 """Print a product metrics summary from ClickHouse (admin/analytics helper)."""
+
 from django.core.management.base import BaseCommand
 
 from apps.analytics import clickhouse

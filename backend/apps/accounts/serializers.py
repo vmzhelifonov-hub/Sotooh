@@ -1,4 +1,5 @@
 """DRF serializers for accounts (auth, org, users)."""
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
@@ -26,7 +27,11 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True, trim_whitespace=False)
 
     def validate(self, attrs):
-        user = authenticate(request=self.context.get("request"), email=attrs["email"], password=attrs["password"])
+        user = authenticate(
+            request=self.context.get("request"),
+            email=attrs["email"],
+            password=attrs["password"],
+        )
         if not user:
             raise serializers.ValidationError({"detail": "Invalid email or password."}, code="authorization")
         attrs["user"] = user
@@ -64,12 +69,23 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     organization_id = serializers.UUIDField(source="organization.id", read_only=True, allow_null=True)
-    organization_name = serializers.CharField(source="organization.company_name", read_only=True, allow_null=True)
+    organization_name = serializers.CharField(
+        source="organization.company_name", read_only=True, allow_null=True
+    )
     role = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name", "organization_id", "organization_name", "role", "is_staff"]
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "organization_id",
+            "organization_name",
+            "role",
+            "is_staff",
+        ]
 
     def get_role(self, obj) -> str | None:
         org = obj.organization

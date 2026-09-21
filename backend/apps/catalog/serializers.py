@@ -1,9 +1,10 @@
 """Product serializers."""
+
 from rest_framework import serializers
 
 from apps.core.validators import validate_image_file
 
-from .models import Category, Product
+from .models import Product
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -34,7 +35,14 @@ class ProductSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "currency", "image_url", "category_display"]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+            "currency",
+            "image_url",
+            "category_display",
+        ]
 
     def get_image_url(self, obj) -> str | None:
         return obj.image.url if obj.image else None
@@ -59,4 +67,4 @@ class CategoryChoicesSerializer(serializers.Serializer):
 
     @classmethod
     def many_from(cls, choices):
-        return [{"value": v, "label": l} for v, l in choices]
+        return [{"value": v, "label": lbl} for v, lbl in choices]

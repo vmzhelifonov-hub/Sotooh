@@ -2,6 +2,7 @@
 
 Never runs automatically; never use in production.
 """
+
 import random
 from decimal import Decimal
 
@@ -10,7 +11,7 @@ from django.utils import timezone
 
 from apps.accounts.models import Membership, Organization, User
 from apps.billing.services import start_trial
-from apps.catalog.models import Category, Product
+from apps.catalog.models import Category, Product, ProductType
 from apps.crm.models import Customer, FollowUp, LeadSource, Stage
 from apps.quotations.models import Quote, QuoteItem, QuoteStatus
 from apps.quotations.services import generate_quote_number
@@ -50,41 +51,153 @@ class Command(BaseCommand):
         start_trial(org)
 
         products_data = [
-            (Category.SOLAR_PANEL, "LONGi", "Hi-MO 6", "ألواح شمسية لونغي 550 واط", "LONGi 550W Panel", "550W", 25, 210000, 265000),
-            (Category.INVERTER, "Huawei", "SUN2000-5KTL", "انفرتر هواوي 5 كيلوواط", "Huawei 5kW Inverter", "5kW", 60, 850000, 1100000),
-            (Category.BATTERY, "Pylontech", "US5000", "بطارية بيلون تيك 4.8 كيلوواط ساعة", "Pylontech 4.8kWh Battery", "4.8kWh", 84, 950000, 1250000),
-            (Category.MOUNTING, "Generic", "Rail-Set", "منظومة تثبيت ألواح", "Mounting Rail Set", "set", 120, 45000, 75000),
-            (Category.CABLE, "Generic", "PV-Cable-6mm", "كابل شمسي 6 مم", "Solar Cable 6mm", "meter", 0, 1500, 2500),
-            (Category.INSTALLATION, "", "", "تركيب وتشغيل المنظومة", "Installation & Commissioning", "job", 12, 0, 400000),
+            (
+                Category.SOLAR_PANEL,
+                "LONGi",
+                "Hi-MO 6",
+                "ألواح شمسية لونغي 550 واط",
+                "LONGi 550W Panel",
+                "550W",
+                25,
+                210000,
+                265000,
+            ),
+            (
+                Category.INVERTER,
+                "Huawei",
+                "SUN2000-5KTL",
+                "انفرتر هواوي 5 كيلوواط",
+                "Huawei 5kW Inverter",
+                "5kW",
+                60,
+                850000,
+                1100000,
+            ),
+            (
+                Category.BATTERY,
+                "Pylontech",
+                "US5000",
+                "بطارية بيلون تيك 4.8 كيلوواط ساعة",
+                "Pylontech 4.8kWh Battery",
+                "4.8kWh",
+                84,
+                950000,
+                1250000,
+            ),
+            (
+                Category.MOUNTING,
+                "Generic",
+                "Rail-Set",
+                "منظومة تثبيت ألواح",
+                "Mounting Rail Set",
+                "set",
+                120,
+                45000,
+                75000,
+            ),
+            (
+                Category.CABLE,
+                "Generic",
+                "PV-Cable-6mm",
+                "كابل شمسي 6 مم",
+                "Solar Cable 6mm",
+                "meter",
+                0,
+                1500,
+                2500,
+            ),
+            (
+                Category.INSTALLATION,
+                "",
+                "",
+                "تركيب وتشغيل المنظومة",
+                "Installation & Commissioning",
+                "job",
+                12,
+                0,
+                400000,
+            ),
         ]
         products = []
-        for cat, brand, model, name_ar, name_en, unit, warranty, cost, sell in products_data:
+        for (
+            cat,
+            brand,
+            model,
+            name_ar,
+            name_en,
+            unit,
+            warranty,
+            cost,
+            sell,
+        ) in products_data:
             p = Product.objects.create(
-                organization=org, category=cat, brand=brand, model=model, sku=f"DEMO-{len(products):03d}",
-                name_ar=name_ar, name_en=name_en, cost_price=cost, selling_price=sell,
-                warranty_months=warranty, unit=unit, type=Product.Service if cat == Category.INSTALLATION else Product.Product,
+                organization=org,
+                category=cat,
+                brand=brand,
+                model=model,
+                sku=f"DEMO-{len(products):03d}",
+                name_ar=name_ar,
+                name_en=name_en,
+                cost_price=cost,
+                selling_price=sell,
+                warranty_months=warranty,
+                unit=unit,
+                type=ProductType.SERVICE if cat == Category.INSTALLATION else ProductType.PRODUCT,
             )
             products.append(p)
 
         customers_data = [
-            ("أحمد الكرخي", "+9647701111111", "Baghdad", LeadSource.WHATSAPP, Stage.QUOTE_SENT),
-            ("سارة عبد الرحمن", "+9647802222222", "Basra", LeadSource.FACEBOOK, Stage.FOLLOW_UP),
-            ("مصطفى الجبوري", "+9647503333333", "Erbil", LeadSource.REFERRAL, Stage.WON),
+            (
+                "أحمد الكرخي",
+                "+9647701111111",
+                "Baghdad",
+                LeadSource.WHATSAPP,
+                Stage.QUOTE_SENT,
+            ),
+            (
+                "سارة عبد الرحمن",
+                "+9647802222222",
+                "Basra",
+                LeadSource.FACEBOOK,
+                Stage.FOLLOW_UP,
+            ),
+            (
+                "مصطفى الجبوري",
+                "+9647503333333",
+                "Erbil",
+                LeadSource.REFERRAL,
+                Stage.WON,
+            ),
             ("ليلى حسن", "+9647714444444", "Mosul", LeadSource.INSTAGRAM, Stage.NEW),
-            ("عمر التكريتي", "+9647705555555", "Tikrit", LeadSource.WALKIN, Stage.CONTACTED),
+            (
+                "عمر التكريتي",
+                "+9647705555555",
+                "Tikrit",
+                LeadSource.WALKIN,
+                Stage.CONTACTED,
+            ),
         ]
         customers = []
         for name, phone, city, source, stage in customers_data:
             c = Customer.objects.create(
-                organization=org, name=name, phone=phone, city=city, source=source, stage=stage,
+                organization=org,
+                name=name,
+                phone=phone,
+                city=city,
+                source=source,
+                stage=stage,
                 assigned_user=user,
-                next_follow_up=timezone.now() + timezone.timedelta(days=random.choice([-2, 0, 1, 3])) if stage == Stage.FOLLOW_UP else None,
+                next_follow_up=timezone.now() + timezone.timedelta(days=random.choice([-2, 0, 1, 3]))
+                if stage == Stage.FOLLOW_UP
+                else None,
             )
             customers.append(c)
 
         for idx, customer in enumerate(customers[:3]):
             quote = Quote.objects.create(
-                organization=org, customer=customer, created_by=user,
+                organization=org,
+                customer=customer,
+                created_by=user,
                 quote_number=generate_quote_number(org),
                 status=QuoteStatus.SENT if idx == 0 else QuoteStatus.DRAFT,
                 valid_until=timezone.localdate() + timezone.timedelta(days=14),
@@ -95,9 +208,15 @@ class Command(BaseCommand):
             for order, p in enumerate(random.sample(products, k=3)):
                 qty = Decimal(random.choice([1, 2, 4, 6, 20]))
                 item = QuoteItem(
-                    organization=org, quote=quote, product=p, description=p.name_ar,
-                    brand_model=f"{p.brand} {p.model}".strip(), quantity=qty, unit=p.unit,
-                    unit_price=p.selling_price, display_order=order,
+                    organization=org,
+                    quote=quote,
+                    product=p,
+                    description=p.name_ar,
+                    brand_model=f"{p.brand} {p.model}".strip(),
+                    quantity=qty,
+                    unit=p.unit,
+                    unit_price=p.selling_price,
+                    display_order=order,
                 )
                 item.line_total = item.compute_line_total()
                 item.save()
@@ -111,7 +230,9 @@ class Command(BaseCommand):
                 quote.save(update_fields=["share_token", "share_enabled"])
 
         FollowUp.objects.create(
-            organization=org, customer=customers[1], user=user,
+            organization=org,
+            customer=customers[1],
+            user=user,
             note="متابعة عرض السعر المرسل الأسبوع الماضي",
             scheduled_for=timezone.now() + timezone.timedelta(days=1),
         )

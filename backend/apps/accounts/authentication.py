@@ -1,4 +1,5 @@
 """Ensure request.user.organization is always available on API requests."""
+
 from rest_framework.authentication import SessionAuthentication
 
 

@@ -1,4 +1,5 @@
 """Core URL routes: health endpoints + dashboard."""
+
 from django.urls import path
 
 from . import views

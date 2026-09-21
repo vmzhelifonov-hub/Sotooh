@@ -3,9 +3,9 @@
 Never scatter `plan == "pro"` checks through the codebase; always go through
 this module.
 """
+
 from datetime import timedelta
 
-from django.db.models import Sum
 from django.utils import timezone
 
 from .models import Plan, PlanCode, Subscription, SubscriptionStatus
@@ -33,7 +33,9 @@ def activate(organization, plan_code: str, months: int = 1) -> Subscription:
     """Manually activate/extend a subscription (Django Admin / management cmd)."""
     Plan.sync_defaults()
     plan = Plan.objects.get(code=plan_code)
-    sub, _ = Subscription.objects.get_or_create(organization=organization)
+    sub = Subscription.objects.filter(organization=organization).first()
+    if sub is None:
+        sub = Subscription(organization=organization)
     sub.plan = plan
     sub.status = SubscriptionStatus.ACTIVE
     sub.starts_at = timezone.now()
@@ -64,9 +66,7 @@ def can_create_quote(organization) -> bool:
     month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     from apps.quotations.models import Quote
 
-    used = Quote.objects.filter(
-        organization=organization, created_at__gte=month_start
-    ).count()
+    used = Quote.objects.filter(organization=organization, created_at__gte=month_start).count()
     return used < limit
 
 

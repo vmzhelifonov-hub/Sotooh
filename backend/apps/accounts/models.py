@@ -1,4 +1,5 @@
 """User, Organization, Membership models."""
+
 import uuid
 
 from django.contrib.auth.models import AbstractUser, BaseUserManager
@@ -37,7 +38,11 @@ class User(AbstractUser):
     username = models.CharField(max_length=150, unique=True, blank=True, null=True)
     email = models.EmailField(unique=True)
     organization = models.ForeignKey(
-        "accounts.Organization", null=True, blank=True, on_delete=models.SET_NULL, related_name="users"
+        "accounts.Organization",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="users",
     )
 
     USERNAME_FIELD = "email"
@@ -51,11 +56,6 @@ class User(AbstractUser):
     @property
     def membership(self):
         return Membership.objects.filter(user=self, is_active=True).select_related("organization").first()
-
-    @property
-    def organization(self):  # type: ignore[override]
-        m = self.membership
-        return m.organization if m else None
 
     def role_in(self, organization) -> str | None:
         m = Membership.objects.filter(user=self, organization=organization, is_active=True).first()
@@ -73,7 +73,9 @@ class Organization(UUIDModel):
     address = models.CharField(max_length=500, blank=True)
     city = models.CharField(max_length=120, blank=True)
     country = models.CharField(max_length=2, default="IQ")
-    preferred_language = models.CharField(max_length=8, default="ar", choices=[("ar", "Arabic"), ("en", "English")])
+    preferred_language = models.CharField(
+        max_length=8, default="ar", choices=[("ar", "Arabic"), ("en", "English")]
+    )
     currency = models.CharField(max_length=3, default="IQD")
     timezone = models.CharField(max_length=64, default="Asia/Baghdad")
     quote_prefix = models.CharField(max_length=12, default="STH")

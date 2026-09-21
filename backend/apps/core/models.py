@@ -1,4 +1,5 @@
 """Common abstract models and managers for Sotooh."""
+
 import uuid
 
 from django.db import models
@@ -28,6 +29,8 @@ class OrganizationScopedManager(models.Manager.from_queryset(OrganizationScopedQ
 
 class OrganizationScopedModel(UUIDModel):
     """Abstract base for all tenant-owned entities."""
+
+    objects = OrganizationScopedManager()
 
     class Meta:
         abstract = True

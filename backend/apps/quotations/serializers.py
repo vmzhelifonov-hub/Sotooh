@@ -1,7 +1,8 @@
 """Quotation serializers."""
+
 from rest_framework import serializers
 
-from .models import PublicQuoteView, Quote, QuoteItem, QuoteStatus
+from .models import Quote, QuoteItem, QuoteStatus
 
 
 class QuoteItemSerializer(serializers.ModelSerializer):
@@ -109,9 +110,22 @@ class QuoteDetailSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
         read_only_fields = [
-            "id", "quote_number", "subtotal", "tax_amount", "total", "share_url",
-            "share_revoked_at", "pdf_url", "pdf_generated_at", "first_viewed_at",
-            "last_viewed_at", "view_count", "sent_at", "won_at", "created_at", "updated_at",
+            "id",
+            "quote_number",
+            "subtotal",
+            "tax_amount",
+            "total",
+            "share_url",
+            "share_revoked_at",
+            "pdf_url",
+            "pdf_generated_at",
+            "first_viewed_at",
+            "last_viewed_at",
+            "view_count",
+            "sent_at",
+            "won_at",
+            "created_at",
+            "updated_at",
         ]
 
     def validate(self, attrs):

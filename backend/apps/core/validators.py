@@ -1,4 +1,5 @@
 """Shared file-validation helpers."""
+
 from rest_framework import serializers
 
 ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}

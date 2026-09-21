@@ -1,4 +1,5 @@
 """Quotation engine models — the heart of Sotooh. All money math is Decimal."""
+
 import secrets
 from decimal import Decimal
 
@@ -22,7 +23,12 @@ class Quote(OrganizationScopedModel):
     organization = models.ForeignKey("accounts.Organization", on_delete=models.CASCADE, related_name="quotes")
     quote_number = models.CharField(max_length=32, unique=True, db_index=True)
     customer = models.ForeignKey("crm.Customer", on_delete=models.PROTECT, related_name="quotes")
-    status = models.CharField(max_length=12, choices=QuoteStatus.choices, default=QuoteStatus.DRAFT, db_index=True)
+    status = models.CharField(
+        max_length=12,
+        choices=QuoteStatus.choices,
+        default=QuoteStatus.DRAFT,
+        db_index=True,
+    )
     issue_date = models.DateField(default=timezone.localdate)
     valid_until = models.DateField(null=True, blank=True)
     currency = models.CharField(max_length=3, default="IQD")
@@ -39,7 +45,12 @@ class Quote(OrganizationScopedModel):
     payment_terms = models.TextField(blank=True)
     delivery_terms = models.TextField(blank=True)
 
-    created_by = models.ForeignKey("accounts.User", null=True, on_delete=models.SET_NULL, related_name="quotes_created")
+    created_by = models.ForeignKey(
+        "accounts.User",
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="quotes_created",
+    )
 
     # Public share link
     share_token = models.CharField(max_length=64, blank=True, db_index=True)
@@ -112,7 +123,9 @@ class Quote(OrganizationScopedModel):
 
 
 class QuoteItem(OrganizationScopedModel):
-    organization = models.ForeignKey("accounts.Organization", on_delete=models.CASCADE, related_name="quote_items")
+    organization = models.ForeignKey(
+        "accounts.Organization", on_delete=models.CASCADE, related_name="quote_items"
+    )
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name="items")
     product = models.ForeignKey("catalog.Product", null=True, blank=True, on_delete=models.SET_NULL)
     description = models.CharField(max_length=500)

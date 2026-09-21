@@ -1,19 +1,19 @@
 """Predictable API error structure for the whole backend."""
-from django.core.exceptions import PermissionDenied
-from django.http import Http404
+
 from rest_framework import status
-from rest_framework.response import Response
 from rest_framework.views import exception_handler as drf_exception_handler
 
 
 def api_exception_handler(exc, context):
     """Wrap every error into {error: {code, message, details}} for predictable frontend handling."""
-    if isinstance(exc, Http404):
-        exc = PermissionDenied("Not found.")
-
     response = drf_exception_handler(exc, context)
     if response is None:
         return None
+
+    # Http404 must stay 404 (never 403) — tenant isolation relies on it
+    if isinstance(response.status_code, int) and response.status_code == 404:
+        response.data = {"error": {"code": "not_found", "message": "Not found."}}
+        return response
 
     code = getattr(exc, "default_code", "error")
     payload = {"code": code, "message": str(getattr(exc, "detail", exc))}
@@ -21,7 +21,9 @@ def api_exception_handler(exc, context):
 
     if isinstance(details, dict):
         payload["details"] = details
-        payload["message"] = details.get("detail", payload["message"]) if "detail" in details else payload["message"]
+        payload["message"] = (
+            details.get("detail", payload["message"]) if "detail" in details else payload["message"]
+        )
     elif isinstance(details, list):
         payload["details"] = details
 

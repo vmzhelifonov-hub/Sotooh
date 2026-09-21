@@ -1,4 +1,5 @@
 """Subscription entitlements — centralized service layer."""
+
 from datetime import timedelta
 
 import pytest
@@ -51,12 +52,20 @@ class TestEntitlements:
             Quote.objects.create(organization=org_a, customer=customer, quote_number=f"STH-{i:05d}")
         assert services.can_create_quote(org_a) is False
 
-    def test_member_limit(self, org_a, plans):
-        services.activate(org_a, PlanCode.SOLO)  # max_users=1, 1 owner already
+    def test_member_limit(self, org_a, user_a, plans):
+        # Solo plan allows max 1 member; the owner already occupies it
+        services.activate(org_a, PlanCode.SOLO)
         assert services.can_add_team_member(org_a) is False
+
+    def test_member_limit_allows_first_member(self, org_a, plans):
+        # Fresh org with zero members can still add one on Solo
+        services.activate(org_a, PlanCode.SOLO)
+        assert services.can_add_team_member(org_a) is True
 
     def test_feature_flags(self, org_a, plans):
         services.activate(org_a, PlanCode.PRO)
         assert services.has_feature(org_a, "analytics") is True
         services.activate(org_a, PlanCode.SOLO)
         assert services.has_feature(org_a, "analytics") is False
+        services.activate(org_a, PlanCode.TEAM)
+        assert services.has_feature(org_a, "analytics") is True

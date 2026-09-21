@@ -3,6 +3,7 @@
 Browser-first session auth (cookies), CSRF-protected, rate limited
 on sensitive endpoints.
 """
+
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.password_validation import validate_password
@@ -11,7 +12,6 @@ from django.core.mail import send_mail
 from django.middleware.csrf import get_token
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.views.decorators.debug import sensitive_post_parameters
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -33,6 +33,12 @@ from .serializers import (
 )
 
 
+class AuthThrottle(ScopedRateThrottle):
+    """Rate limit for auth endpoints (30/hour per IP)."""
+
+    scope = "auth"
+
+
 def _session_cookie_kwargs(response):
     # Cookies are scoped to the whole domain so frontend and backend share auth.
     return response
@@ -40,9 +46,7 @@ def _session_cookie_kwargs(response):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-@throttle_classes([ScopedRateThrottle])
-@throttle_scope("auth")
-@sensitive_post_parameters()
+@throttle_classes([AuthThrottle])
 def register(request):
     serializer = RegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -66,14 +70,15 @@ def register(request):
     track_event("account_registered", organization_id=org.id, user_id=user.id, request=request)
 
     csrf_token = get_token(request)
-    return Response({"user": UserSerializer(user).data, "csrf_token": csrf_token}, status=status.HTTP_201_CREATED)
+    return Response(
+        {"user": UserSerializer(user).data, "csrf_token": csrf_token},
+        status=status.HTTP_201_CREATED,
+    )
 
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-@throttle_classes([ScopedRateThrottle])
-@throttle_scope("auth")
-@sensitive_post_parameters()
+@throttle_classes([AuthThrottle])
 def login_view(request):
     serializer = LoginSerializer(data=request.data, context={"request": request})
     serializer.is_valid(raise_exception=True)
@@ -106,8 +111,7 @@ def csrf(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-@throttle_classes([ScopedRateThrottle])
-@throttle_scope("auth")
+@throttle_classes([AuthThrottle])
 def password_reset(request):
     serializer = PasswordResetRequestSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -121,7 +125,7 @@ def password_reset(request):
     token = default_token_generator.make_token(user)
     reset_url = f"{settings.FRONTEND_PUBLIC_URL}/reset-password?uid={uid}&token={token}"
     send_mail(
-        subject="Sotooh — password reset",
+        subject="Sotooh вЂ” password reset",
         message=f"Use this link to reset your password:\n{reset_url}\n\nIf you didn't request this, ignore this email.",
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],
@@ -132,8 +136,7 @@ def password_reset(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-@throttle_classes([ScopedRateThrottle])
-@throttle_scope("auth")
+@throttle_classes([AuthThrottle])
 def password_reset_confirm(request):
     serializer = PasswordResetConfirmSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
@@ -141,9 +144,15 @@ def password_reset_confirm(request):
     try:
         user = User.objects.get(pk=force_str(urlsafe_base64_decode(data["uid"])))
     except (User.DoesNotExist, ValueError, TypeError):
-        return Response({"error": {"code": "invalid_token", "message": "Invalid or expired link."}}, status=400)
+        return Response(
+            {"error": {"code": "invalid_token", "message": "Invalid or expired link."}},
+            status=400,
+        )
     if not default_token_generator.check_token(user, data["token"]):
-        return Response({"error": {"code": "invalid_token", "message": "Invalid or expired link."}}, status=400)
+        return Response(
+            {"error": {"code": "invalid_token", "message": "Invalid or expired link."}},
+            status=400,
+        )
     validate_password(data["password"], user=user)
     user.set_password(data["password"])
     user.save(update_fields=["password"])
@@ -152,7 +161,6 @@ def password_reset_confirm(request):
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-@sensitive_post_parameters()
 def change_password(request):
     serializer = ChangePasswordSerializer(data=request.data, context={"request": request})
     serializer.is_valid(raise_exception=True)
@@ -169,12 +177,18 @@ def change_password(request):
 def organization_detail(request):
     org = request.user.organization
     if org is None:
-        return Response({"error": {"code": "no_organization", "message": "No organization."}}, status=400)
+        return Response(
+            {"error": {"code": "no_organization", "message": "No organization."}},
+            status=400,
+        )
 
     if request.method == "PATCH":
         m = Membership.objects.filter(user=request.user, organization=org, is_active=True).first()
         if not m or m.role != Membership.ROLE_OWNER:
-            return Response({"error": {"code": "forbidden", "message": "Owner role required."}}, status=403)
+            return Response(
+                {"error": {"code": "forbidden", "message": "Owner role required."}},
+                status=403,
+            )
         serializer = OrganizationSerializer(org, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -193,19 +207,31 @@ def members(request):
 
     if request.method == "POST":
         if m.role != Membership.ROLE_OWNER:
-            return Response({"error": {"code": "forbidden", "message": "Owner role required."}}, status=403)
+            return Response(
+                {"error": {"code": "forbidden", "message": "Owner role required."}},
+                status=403,
+            )
         from apps.billing.services import can_add_team_member
 
         if not can_add_team_member(org):
             return Response(
-                {"error": {"code": "plan_limit", "message": "Your plan does not allow more team members."}},
+                {
+                    "error": {
+                        "code": "plan_limit",
+                        "message": "Your plan does not allow more team members.",
+                    }
+                },
                 status=403,
             )
         mser = MemberSerializer(data=request.data)
         mser.is_valid(raise_exception=True)
-        target = User.objects.filter(email__iexact=User.objects.get(pk=mser.validated_data["user_id"]).email).first()
+        target = User.objects.filter(
+            email__iexact=User.objects.get(pk=mser.validated_data["user_id"]).email
+        ).first()
         membership, _ = Membership.objects.get_or_create(
-            user=target, organization=org, defaults={"role": mser.validated_data.get("role", Membership.ROLE_MEMBER)}
+            user=target,
+            organization=org,
+            defaults={"role": mser.validated_data.get("role", Membership.ROLE_MEMBER)},
         )
         membership.role = mser.validated_data.get("role", membership.role)
         membership.is_active = True

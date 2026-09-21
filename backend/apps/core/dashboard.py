@@ -1,13 +1,11 @@
 """Dashboard: aggregate metrics for the authenticated organization."""
-from datetime import timedelta
 
-from django.db.models import Avg, Count, Q, Sum
+from django.db.models import Avg, Sum
 from django.utils import timezone
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.analytics.services import funnel
 from apps.crm.models import Customer, Stage
 from apps.quotations.models import Quote, QuoteStatus
 
@@ -28,45 +26,69 @@ def dashboard(request):
     won_quotes = quotes.filter(status=QuoteStatus.WON)
     won_value = won_quotes.aggregate(v=Sum("total"))["v"] or 0
     won_count = won_quotes.count()
-    sent_count = quotes.filter(status__in=[QuoteStatus.SENT, QuoteStatus.ACCEPTED, QuoteStatus.WON, QuoteStatus.LOST]).count()
+    sent_count = quotes.filter(
+        status__in=[
+            QuoteStatus.SENT,
+            QuoteStatus.ACCEPTED,
+            QuoteStatus.WON,
+            QuoteStatus.LOST,
+        ]
+    ).count()
     conversion = round(100.0 * won_count / sent_count, 1) if sent_count else 0.0
     avg_quote = quotes.aggregate(a=Avg("total"))["a"] or 0
 
     # Follow-up attention queue
-    today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    attention = Customer.objects.filter(
-        organization=org,
-        next_follow_up__isnull=False,
-        next_follow_up__lte=now.replace(hour=23, minute=59, second=59),
-    ).exclude(stage__in=[Stage.WON, Stage.LOST]).order_by("next_follow_up")[:10]
+    attention = (
+        Customer.objects.filter(
+            organization=org,
+            next_follow_up__isnull=False,
+            next_follow_up__lte=now.replace(hour=23, minute=59, second=59),
+        )
+        .exclude(stage__in=[Stage.WON, Stage.LOST])
+        .order_by("next_follow_up")[:10]
+    )
 
     recent_quotes = quotes.select_related("customer").order_by("-created_at")[:8]
 
-    return Response({
-        "leads_this_month": leads_month,
-        "quotes_this_month": quotes_month_count,
-        "quote_value_this_month": str(quote_value_month),
-        "won_value": str(won_value),
-        "won_deals": won_count,
-        "conversion_rate": conversion,
-        "average_quote_value": str(round(avg_quote, 2)),
-        "overdue_follow_ups": Customer.objects.filter(
-            organization=org, next_follow_up__lt=now
-        ).exclude(stage__in=[Stage.WON, Stage.LOST]).count(),
-        "funnel": {
-            "new": Customer.objects.filter(organization=org, stage=Stage.NEW).count(),
-            "quote_sent": Customer.objects.filter(organization=org, stage__in=[Stage.QUOTE_SENT, Stage.FOLLOW_UP]).count(),
-            "won": Customer.objects.filter(organization=org, stage=Stage.WON).count(),
-        },
-        "needs_attention": [
-            {"id": str(c.id), "name": c.name, "phone": c.phone, "next_follow_up": c.next_follow_up.isoformat()}
-            for c in attention
-        ],
-        "recent_quotes": [
-            {
-                "id": str(q.id), "quote_number": q.quote_number, "customer_name": q.customer.name,
-                "status": q.status, "total": str(q.total), "currency": q.currency, "created_at": q.created_at.isoformat(),
-            }
-            for q in recent_quotes
-        ],
-    })
+    return Response(
+        {
+            "leads_this_month": leads_month,
+            "quotes_this_month": quotes_month_count,
+            "quote_value_this_month": str(quote_value_month),
+            "won_value": str(won_value),
+            "won_deals": won_count,
+            "conversion_rate": conversion,
+            "average_quote_value": str(round(avg_quote, 2)),
+            "overdue_follow_ups": Customer.objects.filter(organization=org, next_follow_up__lt=now)
+            .exclude(stage__in=[Stage.WON, Stage.LOST])
+            .count(),
+            "funnel": {
+                "new": Customer.objects.filter(organization=org, stage=Stage.NEW).count(),
+                "quote_sent": Customer.objects.filter(
+                    organization=org, stage__in=[Stage.QUOTE_SENT, Stage.FOLLOW_UP]
+                ).count(),
+                "won": Customer.objects.filter(organization=org, stage=Stage.WON).count(),
+            },
+            "needs_attention": [
+                {
+                    "id": str(c.id),
+                    "name": c.name,
+                    "phone": c.phone,
+                    "next_follow_up": c.next_follow_up.isoformat(),
+                }
+                for c in attention
+            ],
+            "recent_quotes": [
+                {
+                    "id": str(q.id),
+                    "quote_number": q.quote_number,
+                    "customer_name": q.customer.name,
+                    "status": q.status,
+                    "total": str(q.total),
+                    "currency": q.currency,
+                    "created_at": q.created_at.isoformat(),
+                }
+                for q in recent_quotes
+            ],
+        }
+    )

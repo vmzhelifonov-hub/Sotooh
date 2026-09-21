@@ -1,5 +1,4 @@
 """Plans & subscriptions domain. No payment provider in v1 — adapter-ready."""
-from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
@@ -39,14 +38,38 @@ class Plan(UUIDModel):
     def sync_defaults(cls) -> None:
         """Idempotently ensure the 4 base plans exist."""
         defaults = [
-            {"code": PlanCode.TRIAL, "name": "Trial", "max_users": 2, "max_quotes_per_month": 15, "max_products": 30,
-             "features": {"analytics": False}},
-            {"code": PlanCode.SOLO, "name": "Solo", "max_users": 1, "max_quotes_per_month": 50, "max_products": 100,
-             "features": {"analytics": False}},
-            {"code": PlanCode.PRO, "name": "Pro", "max_users": 5, "max_quotes_per_month": 500, "max_products": 1000,
-             "features": {"analytics": True}},
-            {"code": PlanCode.TEAM, "name": "Team", "max_users": 20, "max_quotes_per_month": 100000,
-             "max_products": 100000, "features": {"analytics": True}},
+            {
+                "code": PlanCode.TRIAL,
+                "name": "Trial",
+                "max_users": 2,
+                "max_quotes_per_month": 15,
+                "max_products": 30,
+                "features": {"analytics": False},
+            },
+            {
+                "code": PlanCode.SOLO,
+                "name": "Solo",
+                "max_users": 1,
+                "max_quotes_per_month": 50,
+                "max_products": 100,
+                "features": {"analytics": False},
+            },
+            {
+                "code": PlanCode.PRO,
+                "name": "Pro",
+                "max_users": 5,
+                "max_quotes_per_month": 500,
+                "max_products": 1000,
+                "features": {"analytics": True},
+            },
+            {
+                "code": PlanCode.TEAM,
+                "name": "Team",
+                "max_users": 20,
+                "max_quotes_per_month": 100000,
+                "max_products": 100000,
+                "features": {"analytics": True},
+            },
         ]
         for d in defaults:
             cls.objects.update_or_create(code=d["code"], defaults=d)
@@ -57,7 +80,11 @@ class Subscription(UUIDModel):
         "accounts.Organization", on_delete=models.CASCADE, related_name="subscription"
     )
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="subscriptions")
-    status = models.CharField(max_length=12, choices=SubscriptionStatus.choices, default=SubscriptionStatus.TRIAL)
+    status = models.CharField(
+        max_length=12,
+        choices=SubscriptionStatus.choices,
+        default=SubscriptionStatus.TRIAL,
+    )
     starts_at = models.DateTimeField(default=timezone.now)
     ends_at = models.DateTimeField(null=True, blank=True)
 
@@ -82,10 +109,15 @@ class Subscription(UUIDModel):
 
     @classmethod
     def current_for(cls, organization) -> "Subscription | None":
-        sub = getattr(organization, "subscription", None)
+        # Fresh query — a cached related object would serve stale plan data
+        sub = cls.objects.filter(organization=organization).first()
         if sub is None:
             return None
-        if sub.ends_at is not None and sub.ends_at < timezone.now() and sub.status == SubscriptionStatus.TRIAL:
+        if (
+            sub.ends_at is not None
+            and sub.ends_at < timezone.now()
+            and sub.status == SubscriptionStatus.TRIAL
+        ):
             sub.status = SubscriptionStatus.EXPIRED
             sub.save(update_fields=["status", "updated_at"])
         return sub

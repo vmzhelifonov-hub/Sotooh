@@ -1,4 +1,5 @@
 """S3 (MinIO-compatible) media storage for Sotooh."""
+
 from django.conf import settings
 from storages.backends.s3 import S3Storage
 

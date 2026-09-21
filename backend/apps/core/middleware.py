@@ -1,4 +1,5 @@
 """Middleware: request id propagation for structured logs."""
+
 import threading
 
 _local = threading.local()

@@ -1,4 +1,5 @@
 """Tenant isolation — the most critical security property of the product."""
+
 import pytest
 from django.urls import reverse
 

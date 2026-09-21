@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sotooh_dev_password}
       POSTGRES_DB: ${POSTGRES_DB:-sotooh}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -56,7 +56,7 @@ services:
       /bin/sh -c "
       mc alias set local http://minio:9000 $${AWS_ACCESS_KEY_ID:-sotoohminio} $${AWS_SECRET_ACCESS_KEY:-sotoohminio_secret} &&
       mc mb --ignore-existing local/$${AWS_STORAGE_BUCKET_NAME:-sotooh-local} &&
-      mc anonymous set download local/$${AWS_STORAGE_BUCKET_NAME:-sotooh-local}/public &&
+      mc anonymous set download local/$${AWS_STORAGE_BUCKET_NAME:-sotooh-local} &&
       exit 0"
     environment:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-sotoohminio}
@@ -128,8 +128,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile.dev
     restart: unless-stopped
     ports:
       - "5173:5173"

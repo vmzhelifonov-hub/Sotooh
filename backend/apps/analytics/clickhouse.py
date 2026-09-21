@@ -1,4 +1,5 @@
 """ClickHouse client — analytics must NEVER break the request flow."""
+
 import logging
 import uuid
 from datetime import datetime, timezone as dt_timezone
@@ -105,8 +106,13 @@ def insert_event(
     )
     try:
         payload = _format_row(row)
-        r = requests.post(f"{conf['url']}/", params={"query": query, "input_format": "JSONEachRow"},
-                          data=payload, auth=conf["auth"], timeout=2)
+        r = requests.post(
+            f"{conf['url']}/",
+            params={"query": query, "input_format": "JSONEachRow"},
+            data=payload,
+            auth=conf["auth"],
+            timeout=2,
+        )
         return r.status_code in (200, 204)
     except requests.RequestException as exc:
         logger.warning("clickhouse insert failed: %s", exc)

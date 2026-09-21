@@ -1,0 +1,11 @@
+/* Font faces for WeasyPrint PDF rendering */
+@font-face {
+    font-family: 'Noto Sans Arabic';
+    src: url('NotoSansArabic-Regular.ttf');
+    font-weight: normal;
+}
+@font-face {
+    font-family: 'Noto Sans Arabic';
+    src: url('NotoSansArabic-Bold.ttf');
+    font-weight: bold;
+}

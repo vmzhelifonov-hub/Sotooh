@@ -1,13 +1,14 @@
-"""Shared test fixtures & factories."""
+"""Shared test fixtures."""
+
 import pytest
+from rest_framework.test import APIClient
 
 from apps.accounts.models import Membership, Organization, User
 
 
 @pytest.fixture
 def org_a(db):
-    org = Organization.objects.create(company_name="Org A")
-    return org
+    return Organization.objects.create(company_name="Org A")
 
 
 @pytest.fixture
@@ -21,8 +22,8 @@ def user_a(org_a, db):
     user.username = user.email
     user.save(update_fields=["username"])
     Membership.objects.create(user=user, organization=org_a, role=Membership.ROLE_OWNER)
-    user.organization = org_a
     User.objects.filter(pk=user.pk).update(organization=org_a)
+    user.refresh_from_db()
     return user
 
 
@@ -32,18 +33,25 @@ def user_b(org_b, db):
     user.username = user.email
     user.save(update_fields=["username"])
     Membership.objects.create(user=user, organization=org_b, role=Membership.ROLE_OWNER)
-    user.organization = org_b
     User.objects.filter(pk=user.pk).update(organization=org_b)
+    user.refresh_from_db()
     return user
 
 
 @pytest.fixture
-def auth_client_a(client, user_a):
-    client.force_login(user_a)
+def auth_client_a(user_a):
+    client = APIClient()
+    client.force_authenticate(user=user_a)
     return client
 
 
 @pytest.fixture
-def auth_client_b(client, user_b):
-    client.force_login(user_b)
+def auth_client_b(user_b):
+    client = APIClient()
+    client.force_authenticate(user=user_b)
     return client
+
+
+@pytest.fixture
+def client():
+    return APIClient()

@@ -1,4 +1,5 @@
 """Celery application for Sotooh."""
+
 import os
 
 from celery import Celery

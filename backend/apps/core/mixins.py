@@ -1,4 +1,5 @@
 """Shared DRF mixins for tenant isolation."""
+
 from rest_framework.exceptions import NotFound
 
 

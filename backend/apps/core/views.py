@@ -1,4 +1,5 @@
 """Core views: health, org context."""
+
 from django.conf import settings
 from django.db import connection
 from django.http import JsonResponse
@@ -68,7 +69,12 @@ def _check_s3_real() -> str:
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
             region_name=settings.AWS_S3_REGION_NAME,
-            config=Config(signature_version="s3v4", connect_timeout=2, read_timeout=2, retries={"max_attempts": 1}),
+            config=Config(
+                signature_version="s3v4",
+                connect_timeout=2,
+                read_timeout=2,
+                retries={"max_attempts": 1},
+            ),
         )
         client.head_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
         return "ok"

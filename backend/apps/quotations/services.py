@@ -1,7 +1,8 @@
 """Quotation domain services: totals math, PDF generation, number generation.
 
-All money arithmetic uses Decimal — never float. Backend is authoritative.
+All money arithmetic uses Decimal вЂ” never float. Backend is authoritative.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -11,6 +12,7 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import transaction
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +24,8 @@ def calculate_totals(quote) -> tuple[Decimal, Decimal, Decimal]:
     Returns (subtotal, total, tax_amount).
     total = subtotal - discount_amount - percent_discount + tax, floored at 0.
     """
-    subtotal = sum((item.line_total for item in quote.items.all()), Decimal("0.00")).quantize(TWO_PLACES)
+    items = quote.items.all() if hasattr(quote.items, "all") else quote.items
+    subtotal = sum((item.line_total for item in items), Decimal("0.00")).quantize(TWO_PLACES)
 
     discount = quote.discount_amount
     if quote.discount_percent > 0:
@@ -100,7 +103,9 @@ def render_quote_pdf(quote) -> bytes:
     font_css_path = settings.BASE_DIR / "assets" / "fonts" / "fonts.css"
     css = CSS(filename=str(font_css_path)) if font_css_path.exists() else None
 
-    pdf_file = HTML(string=html, base_url=str(settings.BASE_DIR)).write_pdf(stylesheets=[css] if css else None)
+    pdf_file = HTML(string=html, base_url=str(settings.BASE_DIR)).write_pdf(
+        stylesheets=[css] if css else None
+    )
     return pdf_file
 
 

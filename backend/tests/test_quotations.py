@@ -1,4 +1,5 @@
 """Quotation math — Decimal correctness is a hard requirement."""
+
 from decimal import Decimal
 
 import pytest
@@ -68,13 +69,21 @@ class TestQuoteItemLineTotal:
     def test_line_total_discount_floor(self):
         from apps.quotations.models import QuoteItem
 
-        item = QuoteItem(quantity=Decimal("2"), unit_price=Decimal("50"), discount_amount=Decimal("500"))
+        item = QuoteItem(
+            quantity=Decimal("2"),
+            unit_price=Decimal("50"),
+            discount_amount=Decimal("500"),
+        )
         assert item.compute_line_total() == Decimal("0.00")
 
     def test_line_total_basic(self):
         from apps.quotations.models import QuoteItem
 
-        item = QuoteItem(quantity=Decimal("3"), unit_price=Decimal("99.99"), discount_amount=Decimal("10"))
+        item = QuoteItem(
+            quantity=Decimal("3"),
+            unit_price=Decimal("99.99"),
+            discount_amount=Decimal("10"),
+        )
         assert item.compute_line_total() == Decimal("289.97")
 
 
@@ -102,7 +111,10 @@ class TestQuoteAPICreation:
         from apps.crm.models import Customer
 
         customer = Customer.objects.create(organization=org_a, name="عميل", phone="+9647701234567")
-        payload = {"customer": str(customer.id), "items": [{"description": "x", "quantity": "1", "unit_price": "10"}]}
+        payload = {
+            "customer": str(customer.id),
+            "items": [{"description": "x", "quantity": "1", "unit_price": "10"}],
+        }
         r1 = auth_client_a.post("/api/v1/quotes/", payload, format="json").json()
         r2 = auth_client_a.post("/api/v1/quotes/", payload, format="json").json()
         assert r1["quote_number"] != r2["quote_number"]
