@@ -41,16 +41,15 @@ def calculate_totals(quote) -> tuple[Decimal, Decimal, Decimal]:
 
 
 def generate_quote_number(organization) -> str:
-    """Atomic, sequential quote number: <PREFIX>-<YEAR>-00001."""
+    """Atomic, sequential quote number: <PREFIX>-<YEAR>-00001 (per-organization counter)."""
     from apps.accounts.models import Organization
-    from django.db.models import F
 
     with transaction.atomic():
-        Organization.objects.filter(pk=organization.pk).select_for_update()
-        Organization.objects.filter(pk=organization.pk).update(quote_counter=F("quote_counter") + 1)
-        organization.refresh_from_db(fields=["quote_counter"])
-        year = timezone_year()
-        return f"{organization.quote_prefix}-{year}-{organization.quote_counter:05d}"
+        locked = Organization.objects.select_for_update().get(pk=organization.pk)
+        locked.quote_counter += 1
+        locked.save(update_fields=["quote_counter"])
+        year = timezone.localdate().year
+        return f"{locked.quote_prefix}-{year}-{locked.quote_counter:05d}"
 
 
 def timezone_year() -> int:

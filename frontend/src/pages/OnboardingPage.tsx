@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { customerApi, orgApi, productApi, quoteApi, type Organization } from "../api/endpoints";
@@ -114,6 +114,7 @@ export default function OnboardingPage() {
     try {
       const created = await customerApi.create({ name: customerName.trim(), phone: customerPhone.trim() });
       setQuoteCustomerId(created.id);
+      setCustomers((prev) => [{ id: created.id, name: created.name }, ...prev]);
       setStep(3);
     } catch (err) {
       toast({ kind: "error", message: extractApiError(err).message });

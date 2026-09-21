@@ -21,7 +21,7 @@ class QuoteStatus(models.TextChoices):
 
 class Quote(OrganizationScopedModel):
     organization = models.ForeignKey("accounts.Organization", on_delete=models.CASCADE, related_name="quotes")
-    quote_number = models.CharField(max_length=32, unique=True, db_index=True)
+    quote_number = models.CharField(max_length=32, db_index=True)
     customer = models.ForeignKey("crm.Customer", on_delete=models.PROTECT, related_name="quotes")
     status = models.CharField(
         max_length=12,
@@ -79,6 +79,10 @@ class Quote(OrganizationScopedModel):
             models.Index(fields=["organization", "status"]),
             models.Index(fields=["organization", "created_at"]),
             models.Index(fields=["share_token"]),
+        ]
+        constraints = [
+            # Quote numbers are unique per organization (org-scoped counter)
+            models.UniqueConstraint(fields=["organization", "quote_number"], name="uniq_org_quote_number"),
         ]
 
     def __str__(self) -> str:

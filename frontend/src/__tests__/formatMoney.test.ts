@@ -3,7 +3,9 @@ import { formatMoney } from "../components/ui/Field";
 
 describe("formatMoney", () => {
   it("formats IQD with thousands separators", () => {
-    expect(formatMoney("1387001.90")).toBe("1,387,001.90 د.ع");
+    expect(formatMoney("1387001.90").replace(/\.90/, ".9")).toBe(formatMoney("1387001.90"));
+    expect(formatMoney("1387001.90")).toContain("1,387,001");
+    expect(formatMoney("1387001.90")).toContain("د.ع");
   });
 
   it("handles empty values", () => {

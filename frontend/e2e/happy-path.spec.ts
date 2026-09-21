@@ -1,95 +1,117 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 /**
- * Full happy path: register → onboarding → product → customer → quote →
- * PDF → public link → sent → follow-up → won → dashboard.
- * Requires the full dev environment (backend + frontend + Postgres + MinIO).
+ * Full happy path: register → onboarding → customer → quote →
+ * PDF → share link → public quote → sent → won → dashboard → tenant isolation.
  */
 const random = Date.now();
-const EMAIL = `e2e-${random}@test.iq`;
 const PASSWORD = "Strong12345!";
+
+async function register(page: Page, suffix = "") {
+  await page.goto("/register");
+  await page.getByLabel(/اسم الشركة|Company name/i).fill(`E2E Solar ${random}${suffix}`);
+  await page.getByLabel(/البريد الإلكتروني|Email/i).fill(`e2e-${random}${suffix}@test.iq`);
+  await page.getByLabel(/كلمة المرور|Password/i).first().fill(PASSWORD);
+  await page.getByRole("button", { name: /إنشاء حساب|Sign up/i }).click();
+  await expect(page).toHaveURL(/onboarding/, { timeout: 15000 });
+}
 
 test.describe.serial("Sotooh happy path", () => {
   test("register creates account and opens onboarding", async ({ page }) => {
-    await page.goto("/register");
-    await page.getByLabel(/اسم الشركة|Company name/i).fill(`E2E Solar ${random}`);
-    await page.getByLabel(/البريد الإلكتروني|Email/i).fill(EMAIL);
-    await page.getByLabel(/كلمة المرور|Password/i).first().fill(PASSWORD);
-    await page.getByRole("button", { name: /إنشاء حساب|Sign up/i }).click();
-    await expect(page).toHaveURL(/onboarding/, { timeout: 15000 });
+    await register(page, "first");
   });
 
-  test("onboarding company step saves and advances", async ({ page }) => {
-    await page.goto("/app/onboarding");
+  test("onboarding: company → skip product → create customer → create quote", async ({ page }) => {
+    await register(page, "main");
+    // Step 1: company
     await page.getByLabel(/اسم الشركة|Company name/i).fill(`E2E Solar Co ${random}`);
+    await page.getByLabel(/المدينة|City/i).fill("Baghdad");
+    await page.getByLabel(/الهاتف|Phone/i).fill("+9647701234567");
     await page.getByRole("button", { name: /التالي|Next/i }).click();
-    await expect(page.getByText(/أول منتج|First product/i)).toBeVisible();
-  });
+    await expect(page.getByText(/أول منتج|First product/i)).toBeVisible({ timeout: 10000 });
 
-  test("create customer", async ({ page }) => {
-    await page.goto("/app/customers");
-    await page.getByRole("button", { name: /إضافة عميل|Add customer/i }).click();
+    // Step 2: skip product
+    await page.getByRole("button", { name: /تخطي|Skip/i }).click();
+    await expect(page.getByText(/أول عميل|First customer/i)).toBeVisible({ timeout: 10000 });
+
+    // Step 3: create customer
     await page.getByLabel(/الاسم|Name/i).fill("عميل اختبار");
-    await page.getByLabel(/الهاتف|Phone/i).first().fill("+9647700000000");
-    await page.getByRole("button", { name: /^حفظ$|^Save$/i }).click();
+    await page.getByLabel(/الهاتف|Phone/i).fill("+9647709999111");
+    await page.getByRole("button", { name: /التالي|Next/i }).click();
+    await expect(page.locator(".onboarding__step-label")).toContainText(/أول عرض سعر|First quotation/i, { timeout: 10000 });
+
+    // Step 4: create quote (customer auto-selected)
+    await page.getByLabel(/الوصف|Description/i).fill("منظومة طاقة شمسية 3 كيلوواط");
+    await page.getByLabel(/سعر الوحدة|Unit price/i).fill("4500000");
+    await page.getByRole("button", { name: /البدء باستخدام سطوع|Start using Sotooh/i }).click();
+    await expect(page).toHaveURL(/dashboard/, { timeout: 15000 });
     await expect(page.getByText("عميل اختبار")).toBeVisible();
   });
 
-  test("create quote", async ({ page }) => {
+  test("quote: PDF + share + public link + sent + won + dashboard", async ({ page, browser }) => {
+    await register(page, "quote");
+    // Skip through onboarding
+    await page.getByLabel(/اسم الشركة|Company name/i).fill(`E2E Solar Q ${random}`);
+    await page.getByRole("button", { name: /التالي|Next/i }).click();
+    await page.getByRole("button", { name: /تخطي|Skip/i }).first().click();
+    await page.getByRole("button", { name: /تخطي|Skip/i }).first().click();
+    await page.getByRole("button", { name: /تخطي|Skip/i }).first().click();
+
+    // Create customer via UI
+    await page.goto("/app/customers");
+    await page.getByRole("button", { name: /إضافة عميل|Add customer/i }).click();
+    await page.getByLabel(/الاسم|Name/i).fill("عميل عروض");
+    await page.getByLabel(/الهاتف|Phone/i).first().fill("+9647700000042");
+    await page.getByRole("button", { name: /^حفظ$|^Save$/i }).click();
+    await expect(page.getByText("عميل عروض")).toBeVisible({ timeout: 10000 });
+
+    // Create quote
     await page.goto("/app/quotes/new");
     await page.getByLabel(/العميل|Customer/i).selectOption({ index: 1 });
-    await page.getByPlaceholder(/الوصف|Description/i).first().fill("لوح شمسي 550 واط");
-    await page.getByLabel(/سعر الوحدة|Unit price/i).first().fill("265000");
+    await page.getByPlaceholder(/الوصف|Description/i).first().fill("بطارية ليثيوم 5 كيلوواط");
+    await page.getByLabel(/سعر الوحدة|Unit price/i).first().fill("1250000");
     await page.getByRole("button", { name: /حفظ كمسودة|Save draft/i }).click();
-    await expect(page).toHaveURL(/\/app\/quotes\/(?!new)[a-f0-9-]+/, { timeout: 15000 });
-  });
+    await expect(page).toHaveURL(/\/app\/quotes\/[a-f0-9-]+/, { timeout: 15000 });
 
-  test("generate PDF and share link", async ({ page }) => {
-    await page.goto("/app/quotes");
-    await page.getByRole("link").first().click();
+    // Generate PDF
     await page.getByRole("button", { name: /إنشاء PDF|Generate PDF/i }).click();
     await expect(page.getByRole("button", { name: /تحميل PDF|Download PDF/i })).toBeVisible({ timeout: 30000 });
 
-    await page.getByRole("button", { name: /مشاركة|Share/i }).first().click();
-    await expect(page.getByText(/wa.me|\/q\//).first()).toBeVisible();
+    // Create share link
+    await page.getByRole("button", { name: /^مشاركة$|^Share$/i }).first().click();
+    await expect(page.getByText(/\/q\//).first()).toBeVisible({ timeout: 15000 });
+    const shareUrl = (await page.getByText(/\/q\//).first().textContent())!.trim();
+    const path = shareUrl.match(/\/q\/[\w-]+/)?.[0];
+    expect(path).toBeTruthy();
+
+    // Open public link without session
+    const anon = await browser.newContext();
+    const anonPage = await anon.newPage();
+    await anonPage.goto(path!);
+    await expect(anonPage.getByText(/عرض سعر|Commercial Offer/i)).toBeVisible({ timeout: 15000 });
+    await anon.close();
+
+    // Mark sent then won
+    await page.getByRole("button", { name: /تحديد كمُرسل|Mark as sent/i }).click();
+    await expect(page.getByRole("button", { name: /تم الإغلاق ✓|Mark won/i })).toBeVisible({ timeout: 10000 });
+    await page.getByRole("button", { name: /تم الإغلاق ✓|Mark won/i }).click();
+
+    // Dashboard reflects the won deal
+    await page.goto("/app/dashboard");
+    await expect(page.getByText(/صفقات مفتوحة|Won deals/i)).toBeVisible();
   });
 
-  test("public quote opens without auth and tracks view", async ({ browser }) => {
-    const context = await browser.newContext(); // no session cookies
-    const page = await context.newPage();
-    await page.goto("/app/quotes");
-    // extract share URL from the quote detail
-    await page.getByRole("link").first().click();
-    const shareText = await page.getByText(/\/q\//).first().textContent();
-    const path = shareText?.match(/\/q\/[\w-]+/)?.[0];
-    expect(path, "share link should exist").toBeTruthy();
-    await page.goto(path!);
-    await expect(page.getByText(/عرض سعر|Commercial Offer/i)).toBeVisible();
-    await context.close();
-  });
-
-  test("tenant isolation: org B cannot see org A data", async ({ browser }) => {
-    const context = await browser.newContext();
-    const page = await context.newPage();
-    const otherEmail = `e2e-other-${random}@test.iq`;
+  test("tenant isolation: org B cannot see org A data", async ({ page }) => {
     await page.goto("/register");
-    await page.getByLabel(/اسم الشركة|Company name/i).fill(`Other Org ${random}`);
-    await page.getByLabel(/البريد الإلكتروني|Email/i).fill(otherEmail);
+    await page.getByLabel(/اسم الشركة|Company name/i).fill(`Isolation Org ${random}`);
+    await page.getByLabel(/البريد الإلكتروني|Email/i).fill(`iso-${random}@test.iq`);
     await page.getByLabel(/كلمة المرور|Password/i).first().fill(PASSWORD);
     await page.getByRole("button", { name: /إنشاء حساب|Sign up/i }).click();
     await expect(page).toHaveURL(/onboarding/);
-    // skip onboarding to dashboard
-    await page.goto("/app/customers");
-    await expect(page.getByText("عميل اختبار")).toHaveCount(0);
-    await context.close();
-  });
 
-  test("mark quote sent then won; dashboard updates", async ({ page }) => {
-    await page.goto("/app/quotes");
-    await page.getByRole("link").first().click();
-    await page.getByRole("button", { name: /تحديد كمُرسل|Mark as sent/i }).click();
-    await page.getByRole("button", { name: /تم الإغلاق ✓|Mark won/i }).click();
-    await page.goto("/app/dashboard");
-    await expect(page.getByText(/صفقات مفتوحة|Won deals/i)).toBeVisible();
+    // Their customers list must not contain org A's customers
+    await page.goto("/app/customers");
+    await expect(page.getByText("عميل عروض")).toHaveCount(0);
+    await expect(page.getByText("عميل اختبار")).toHaveCount(0);
   });
 });

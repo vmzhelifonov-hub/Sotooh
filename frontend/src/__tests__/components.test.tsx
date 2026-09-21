@@ -1,9 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import LandingPage from "../pages/LandingPage";
 import { ToastProvider } from "../providers/ToastProvider";
 import { AuthProvider } from "../providers/AuthProvider";
+
+function renderWithProviders(ui: React.ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={client}>
+      <ToastProvider>
+        <AuthProvider>{ui}</AuthProvider>
+      </ToastProvider>
+    </QueryClientProvider>
+  );
+}
 
 describe("LandingPage", () => {
   it("renders hero in Arabic by default", () => {
@@ -28,13 +40,7 @@ describe("LandingPage", () => {
 
 describe("AuthProvider smoke", () => {
   it("renders children", () => {
-    render(
-      <ToastProvider>
-        <AuthProvider>
-          <div>child-content-marker</div>
-        </AuthProvider>
-      </ToastProvider>
-    );
+    renderWithProviders(<div>child-content-marker</div>);
     expect(screen.getByText("child-content-marker")).toBeInTheDocument();
   });
 });
