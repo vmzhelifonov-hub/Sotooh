@@ -1,4 +1,5 @@
 """S3 (MinIO-compatible) media storage for Sotooh."""
+
 import threading
 
 from django.conf import settings

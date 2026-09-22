@@ -5,22 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('accounts', '0002_user_organization'),
-        ('crm', '0001_initial'),
-        ('quotations', '0001_initial'),
+        ("accounts", "0002_user_organization"),
+        ("crm", "0001_initial"),
+        ("quotations", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='quote',
-            name='quote_number',
+            model_name="quote",
+            name="quote_number",
             field=models.CharField(db_index=True, max_length=32),
         ),
         migrations.AddConstraint(
-            model_name='quote',
-            constraint=models.UniqueConstraint(fields=('organization', 'quote_number'), name='uniq_org_quote_number'),
+            model_name="quote",
+            constraint=models.UniqueConstraint(
+                fields=("organization", "quote_number"), name="uniq_org_quote_number"
+            ),
         ),
     ]
