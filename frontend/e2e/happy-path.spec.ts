@@ -92,7 +92,8 @@ test.describe.serial("Sotooh happy path", () => {
     const anon = await browser.newContext();
     const anonPage = await anon.newPage();
     await anonPage.goto(path!);
-    await expect(anonPage.getByText(/عرض سعر|Commercial Offer/i)).toBeVisible({ timeout: 15000 });
+    await expect(anonPage.locator(".public-doc__subtitle")).toContainText(/Commercial Offer|عرض سعر/i, { timeout: 15000 });
+    await expect(anonPage.getByText("Sotooh")).toBeVisible();
     await anon.close();
 
     // Mark sent then won
