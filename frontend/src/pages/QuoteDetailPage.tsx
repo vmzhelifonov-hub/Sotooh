@@ -62,7 +62,7 @@ export default function QuoteDetailPage() {
   const isNew = id === "new";
 
   const [form, setForm] = useState({ ...EMPTY_DRAFT });
-  const [items, setItems] = useState<DraftItem[]>([]);
+  const [items, setItems] = useState<DraftItem[]>(isNew ? [newCustomItem(0)] : []);
   const [shareUrl, setShareUrl] = useState("");
   const [pdfUrl, setPdfUrl] = useState("");
 

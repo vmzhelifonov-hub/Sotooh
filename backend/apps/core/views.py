@@ -58,12 +58,17 @@ def _check_s3() -> str:
     return _check_s3_real()
 
 
-def _check_s3_real() -> str:
-    try:
-        import boto3  # provided transitively by django-storages[s3]
+_s3_client = None
+
+
+def _get_s3_client():
+    """Cached boto3 client — creating one is expensive (service model JSON loading)."""
+    global _s3_client
+    if _s3_client is None:
+        import boto3
         from botocore.client import Config
 
-        client = boto3.client(
+        _s3_client = boto3.client(
             "s3",
             endpoint_url=settings.AWS_S3_ENDPOINT_URL or None,
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -76,6 +81,12 @@ def _check_s3_real() -> str:
                 retries={"max_attempts": 1},
             ),
         )
+    return _s3_client
+
+
+def _check_s3_real() -> str:
+    try:
+        client = _get_s3_client()
         client.head_bucket(Bucket=settings.AWS_STORAGE_BUCKET_NAME)
         return "ok"
     except Exception as exc:

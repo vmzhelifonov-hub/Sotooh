@@ -165,16 +165,19 @@ AWS_DEFAULT_ACL = None
 AWS_QUERYSTRING_AUTH = False
 AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "public, max-age=86400"}
 
-# Default to S3 media storage; falls back to local in test settings
+# Default storage: django-storages S3 (client is instantiated lazily and
+# cached per storage instance). boto3 client creation is expensive —
+# django-storages keeps a single instance per process (module-level
+# default_storage), so model JSON loading happens once, not per request.
 STORAGES = {
     "default": {
-        "BACKEND": "core.storage.MediaStorage" if False else "storages.backends.s3.S3Storage",
+        "BACKEND": "apps.core.storage.MediaStorage",
     },
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
     },
 }
-DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+DEFAULT_FILE_STORAGE = "apps.core.storage.MediaStorage"
 
 MEDIA_URL = "/media/"
 

@@ -73,9 +73,13 @@ test.describe.serial("Sotooh happy path", () => {
     await page.getByRole("button", { name: /حفظ كمسودة|Save draft/i }).click();
     await expect(page).toHaveURL(/\/app\/quotes\/[a-f0-9-]+/, { timeout: 15000 });
 
-    // Generate PDF
-    await page.getByRole("button", { name: /إنشاء PDF|Generate PDF/i }).click();
-    await expect(page.getByRole("button", { name: /تحميل PDF|Download PDF/i })).toBeVisible({ timeout: 30000 });
+    // Generate PDF (server-side rendering can take a while on cold start)
+    const [pdfResp] = await Promise.all([
+      page.waitForResponse((r) => r.url().includes("/pdf/"), { timeout: 60000 }),
+      page.getByRole("button", { name: /إنشاء PDF|Generate PDF/i }).click(),
+    ]);
+    expect(pdfResp.status()).toBe(200);
+    await expect(page.getByRole("button", { name: /تحميل PDF|Download PDF/i })).toBeVisible({ timeout: 60000 });
 
     // Create share link
     await page.getByRole("button", { name: /^مشاركة$|^Share$/i }).first().click();
