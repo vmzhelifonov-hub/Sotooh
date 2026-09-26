@@ -20,6 +20,19 @@ SECURE_REFERRER_POLICY = "same-origin"
 # ------------------------------------------------------------------ storage
 AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL", "")
 
+# Small-VPS fallback: when USE_LOCAL_MEDIA=1, media files (logos, PDFs) are
+# stored on a persistent local volume instead of S3/MinIO. The domain code
+# (default_storage API) is unchanged — switch back to S3 later by setting
+# AWS_* env vars and USE_LOCAL_MEDIA=0.
+USE_LOCAL_MEDIA = env_bool("USE_LOCAL_MEDIA", False)
+if USE_LOCAL_MEDIA:
+    STORAGES = {
+        "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+        "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+    }
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+    MEDIA_ROOT = env("MEDIA_ROOT", "/app/media")
+
 # ------------------------------------------------------------------- cache
 CACHES = {
     "default": {

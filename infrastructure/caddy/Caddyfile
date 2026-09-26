@@ -1,3 +1,8 @@
+# Redirect www to the primary domain (permanent)
+www.{$DOMAIN} {
+	redir https://{$DOMAIN}{uri} permanent
+}
+
 {$DOMAIN} {
 	# Backend: Django API + admin + health
 	handle /api/* {
@@ -11,6 +16,14 @@
 	}
 	handle /static/* {
 		reverse_proxy backend:8000
+	}
+
+	# Media files (logos, images) served by Caddy from the shared volume
+	# when USE_LOCAL_MEDIA=1. With S3 they are served by the provider URL.
+	handle /media/* {
+		root * /srv/media
+		try_files {path} =404
+		file_server
 	}
 
 	# Frontend: everything else (SPA with client-side routing)
