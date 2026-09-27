@@ -22,7 +22,7 @@ www.{$DOMAIN} {
 	# when USE_LOCAL_MEDIA=1. With S3 they are served by the provider URL.
 	handle /media/* {
 		root * /srv/media
-		try_files {path} =404
+		uri strip_prefix /media
 		file_server
 	}
 
