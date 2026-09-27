@@ -14,4 +14,6 @@ FROM caddy:2-alpine AS runtime
 
 COPY --from=build /app/dist /usr/share/caddy
 
+COPY frontend/production.Caddyfile /etc/caddy/Caddyfile
+
 EXPOSE 80
