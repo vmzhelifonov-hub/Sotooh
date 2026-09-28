@@ -1,6 +1,6 @@
 """Quotation domain services: totals math, PDF generation, number generation.
 
-All money arithmetic uses Decimal вЂ” never float. Backend is authoritative.
+All money arithmetic uses Decimal — never float. Backend is authoritative.
 """
 
 from __future__ import annotations
@@ -103,7 +103,8 @@ def render_quote_pdf(quote) -> bytes:
     css = CSS(filename=str(font_css_path)) if font_css_path.exists() else None
 
     pdf_file = HTML(string=html, base_url=str(settings.BASE_DIR)).write_pdf(
-        stylesheets=[css] if css else None
+        stylesheets=[css] if css else None,
+        full_fonts=True,  # keep the whole font + correct ToUnicode so text extraction stays valid
     )
     return pdf_file
 

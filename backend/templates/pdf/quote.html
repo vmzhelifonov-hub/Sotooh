@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <style>
     @page {
         size: A4;
@@ -14,11 +14,14 @@
             color: #888;
         }
     }
-    body {
-        font-family: 'Noto Sans Arabic', sans-serif;
+    html, body {
+        font-family: 'Noto Sans Arabic', 'DejaVu Sans', sans-serif;
         color: #111111;
         font-size: 10pt;
         line-height: 1.6;
+    }
+    [dir="rtl"] {
+        font-family: 'Noto Sans Arabic', 'DejaVu Sans', sans-serif;
     }
     .header {
         display: flex;
@@ -39,7 +42,12 @@
     .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
     .meta-table td { padding: 3px 6px; vertical-align: top; }
     .meta-label { color: #555555; font-size: 9pt; }
-    .quote-num { font-size: 12pt; font-weight: bold; }
+    .quote-num {
+        font-size: 12pt;
+        font-weight: bold;
+        direction: ltr;
+        unicode-bidi: isolate;
+    }
     h2.section {
         font-size: 11pt;
         color: #111111;
@@ -66,7 +74,12 @@
         vertical-align: top;
     }
     table.items tr:nth-child(even) td { background: #F7F6F2; }
-    .num { direction: ltr; text-align: left; font-family: 'Noto Sans Arabic', sans-serif; }
+    .num {
+        direction: ltr;
+        text-align: left;
+        unicode-bidi: isolate;
+        font-family: 'Noto Sans Arabic', 'DejaVu Sans', sans-serif;
+    }
     .totals { margin-right: auto; width: 55%; margin-top: 8px; }
     .totals td { padding: 5px 8px; font-size: 10pt; }
     .totals .grand td {
@@ -107,44 +120,44 @@
         {% endif %}
     </div>
     <div class="doc-title">
-        Ш№Ш±Ш¶ ШіШ№Ш±<br>
+        عرض سعر<br>
         <span class="gold" style="font-size:11pt;">Commercial Offer</span>
     </div>
 </div>
 
 <table class="meta-table">
     <tr>
-        <td class="meta-label">Ш±Щ‚Щ… Ш§Щ„Ш№Ш±Ш¶</td>
+        <td class="meta-label">رقم العرض</td>
         <td class="quote-num num">{{ quote.quote_number }}</td>
-        <td class="meta-label">Ш§Щ„ШЄШ§Ш±ЩЉШ®</td>
+        <td class="meta-label">التاريخ</td>
         <td>{{ issue_date|date:"Y/m/d" }}</td>
     </tr>
     <tr>
-        <td class="meta-label">Ш§ШіЩ… Ш§Щ„Ш№Щ…ЩЉЩ„</td>
+        <td class="meta-label">اسم العميل</td>
         <td>{{ quote.customer.name }}</td>
-        <td class="meta-label">ШµШ§Щ„Ш­ Ш­ШЄЩ‰</td>
-        <td>{% if valid_until %}{{ valid_until|date:"Y/m/d" }}{% else %}вЂ”{% endif %}</td>
+        <td class="meta-label">صالح حتى</td>
+        <td>{% if valid_until %}{{ valid_until|date:"Y/m/d" }}{% else %}—{% endif %}</td>
     </tr>
     <tr>
-        <td class="meta-label">Щ‡Ш§ШЄЩЃ Ш§Щ„Ш№Щ…ЩЉЩ„</td>
+        <td class="meta-label">هاتف العميل</td>
         <td class="num">{{ quote.customer.phone }}</td>
-        <td class="meta-label">Ш§Щ„Щ…ШЇЩЉЩ†Ш©</td>
-        <td>{{ quote.customer.city|default:"вЂ”" }}</td>
+        <td class="meta-label">المدينة</td>
+        <td>{{ quote.customer.city|default:"—" }}</td>
     </tr>
 </table>
 
-<h2 class="section">ШЄЩЃШ§ШµЩЉЩ„ Ш§Щ„Щ…Щ†ШЄШ¬Ш§ШЄ Щ€Ш§Щ„Ш®ШЇЩ…Ш§ШЄ</h2>
+<h2 class="section">تفاصيل المنتجات والخدمات</h2>
 
 <table class="items">
     <thead>
         <tr>
             <th style="width:5%;">#</th>
-            <th style="width:35%;">Ш§Щ„Щ€ШµЩЃ</th>
-            <th style="width:18%;">Ш§Щ„Щ…Ш§Ш±ЩѓШ© / Ш§Щ„Щ…Щ€ШЇЩЉЩ„</th>
-            <th style="width:8%;">Ш§Щ„ЩѓЩ…ЩЉШ©</th>
-            <th style="width:8%;">Ш§Щ„Щ€Ш­ШЇШ©</th>
-            <th style="width:13%;">ШіШ№Ш± Ш§Щ„Щ€Ш­ШЇШ© (ШЇЩЉЩ†Ш§Ш±)</th>
-            <th style="width:13%;">Ш§Щ„Щ…Ш¬Щ…Щ€Ш№ (ШЇЩЉЩ†Ш§Ш±)</th>
+            <th style="width:35%;">الوصف</th>
+            <th style="width:18%;">الماركة / الموديل</th>
+            <th style="width:8%;">الكمية</th>
+            <th style="width:8%;">الوحدة</th>
+            <th style="width:13%;">سعر الوحدة (دينار)</th>
+            <th style="width:13%;">المجموع (دينار)</th>
         </tr>
     </thead>
     <tbody>
@@ -152,7 +165,7 @@
         <tr>
             <td>{{ forloop.counter }}</td>
             <td>{{ item.description }}</td>
-            <td>{{ item.brand_model|default:"вЂ”" }}</td>
+            <td class="num">{{ item.brand_model|default:"—" }}</td>
             <td class="num">{{ item.quantity }}</td>
             <td>{{ item.unit }}</td>
             <td class="num">{{ item.unit_price }}</td>
@@ -164,49 +177,49 @@
 
 <table class="totals">
     <tr>
-        <td>Ш§Щ„Щ…Ш¬Щ…Щ€Ш№ Ш§Щ„ЩЃШ±Ш№ЩЉ</td>
-        <td class="num">{{ quote.subtotal }} ШЇ.Ш№</td>
+        <td>المجموع الفرعي</td>
+        <td class="num">{{ quote.subtotal }} د.ع</td>
     </tr>
     {% if quote.discount_amount > 0 or quote.discount_percent > 0 %}
     <tr>
-        <td>Ш§Щ„Ш®ШµЩ…</td>
-        <td class="num">-{{ quote.discount_amount }} ШЇ.Ш№</td>
+        <td>الخصم</td>
+        <td class="num">-{{ quote.discount_amount }} د.ع</td>
     </tr>
     {% endif %}
     {% if quote.tax_percent > 0 %}
     <tr>
-        <td>Ш§Щ„Ш¶Ш±ЩЉШЁШ© ({{ quote.tax_percent }}%)</td>
-        <td class="num">{{ quote.tax_amount }} ШЇ.Ш№</td>
+        <td>الضريبة ({{ quote.tax_percent }}%)</td>
+        <td class="num">{{ quote.tax_amount }} د.ع</td>
     </tr>
     {% endif %}
     <tr class="grand">
-        <td>Ш§Щ„Щ…Ш¬Щ…Щ€Ш№ Ш§Щ„Щ†Щ‡Ш§Ш¦ЩЉ</td>
-        <td class="num gold">{{ quote.total }} ШЇ.Ш№</td>
+        <td>المجموع النهائي</td>
+        <td class="num gold">{{ quote.total }} د.ع</td>
     </tr>
 </table>
 
 {% if quote.notes_ar %}
-<h2 class="section">Щ…Щ„Ш§Ш­ШёШ§ШЄ</h2>
+<h2 class="section">ملاحظات</h2>
 <div class="notes-block">{{ quote.notes_ar|linebreaksbr }}</div>
 {% endif %}
 
 {% if quote.payment_terms %}
-<h2 class="section">ШґШ±Щ€Ш· Ш§Щ„ШЇЩЃШ№</h2>
+<h2 class="section">شروط الدفع</h2>
 <div class="notes-block">{{ quote.payment_terms|linebreaksbr }}</div>
 {% endif %}
 
 {% if quote.delivery_terms %}
-<h2 class="section">ШґШ±Щ€Ш· Ш§Щ„ШЄЩ€ШµЩЉЩ„ Щ€Ш§Щ„ШЄШ±ЩѓЩЉШЁ</h2>
+<h2 class="section">شروط التوصيل والتركيب</h2>
 <div class="notes-block">{{ quote.delivery_terms|linebreaksbr }}</div>
 {% endif %}
 
 <div class="footer">
     <div>
-        {% if org.phone %}рџ“ћ {{ org.phone }}{% endif %}
-        {% if org.email %} &nbsp;вњ‰ {{ org.email }}{% endif %}
-        {% if org.address %}{% if org.city %} &nbsp;рџ“Ќ {{ org.city }}{% endif %}{% endif %}
+        {% if org.phone %}📞 {{ org.phone }}{% endif %}
+        {% if org.email %} &nbsp;✉ {{ org.email }}{% endif %}
+        {% if org.address %}{% if org.city %} &nbsp;📍 {{ org.city }}{% endif %}{% endif %}
     </div>
-    <div><span class="brandmark">Sotooh</span> В· ШіШ·Щ€Ш№</div>
+    <div><span class="brandmark">Sotooh</span> · سطوع</div>
 </div>
 
 </body>

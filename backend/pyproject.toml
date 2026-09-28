@@ -1,7 +1,7 @@
 [project]
 name = "sotooh-backend"
 version = "0.1.0"
-description = "Sotooh — B2B SaaS for solar installers in Iraq. Django backend."
+description = "Sotooh вЂ” B2B SaaS for solar installers in Iraq. Django backend."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Proprietary" }
@@ -19,7 +19,7 @@ dependencies = [
     "celery==5.4.*",
     "redis==5.0.*",
     "clickhouse-connect==0.7.*",
-    "weasyprint>=63,<66",
+    "weasyprint>=66,<71",
     "python-dotenv>=1.0",
     "requests>=2.32",
     "django-ratelimit==4.1",
@@ -38,6 +38,7 @@ dev = [
     "mypy>=1.11",
     "django-stubs[compatible-mypy]==5.0.*",
     "freezegun>=1.5",
+    "pypdf>=5,<7",
 ]
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]

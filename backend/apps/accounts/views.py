@@ -125,7 +125,7 @@ def password_reset(request):
     token = default_token_generator.make_token(user)
     reset_url = f"{settings.FRONTEND_PUBLIC_URL}/reset-password?uid={uid}&token={token}"
     send_mail(
-        subject="Sotooh вЂ” password reset",
+        subject="Sotooh — password reset",
         message=f"Use this link to reset your password:\n{reset_url}\n\nIf you didn't request this, ignore this email.",
         from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[user.email],

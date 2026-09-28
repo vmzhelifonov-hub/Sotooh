@@ -68,7 +68,7 @@ export default function PublicQuotePage() {
             )}
           </div>
           <div className="public-doc__title">
-            Ш№Ш±Ш¶ ШіШ№Ш±
+            عرض سعر
             <span className="public-doc__subtitle">Commercial Offer</span>
           </div>
         </header>
@@ -85,7 +85,7 @@ export default function PublicQuotePage() {
               <td className="public-meta__label">{t("public.prepared_for")}</td>
               <td className="public-meta__strong">{data.customer_name}</td>
               <td className="public-meta__label">{t("public.valid_until")}</td>
-              <td>{data.valid_until ? new Date(data.valid_until).toLocaleDateString("ar-IQ") : "вЂ”"}</td>
+              <td>{data.valid_until ? new Date(data.valid_until).toLocaleDateString("ar-IQ") : "—"}</td>
             </tr>
           </tbody>
         </table>
@@ -107,7 +107,7 @@ export default function PublicQuotePage() {
               <tr key={i}>
                 <td>{i + 1}</td>
                 <td>{item.description}</td>
-                <td dir="ltr">{item.brand_model || "вЂ”"}</td>
+                <td dir="ltr">{item.brand_model || "—"}</td>
                 <td dir="ltr">{item.quantity}</td>
                 <td>{item.unit}</td>
                 <td dir="ltr">{formatMoney(item.unit_price, data.currency)}</td>
@@ -171,7 +171,7 @@ export default function PublicQuotePage() {
             {data.company_city && <p>{data.company_city}</p>}
           </div>
           <div className="public-footer__brand">
-            {t("public.powered_by")} <span className="brand-gold">Sotooh</span> В· ШіШ·Щ€Ш№
+            {t("public.powered_by")} <span className="brand-gold">Sotooh</span> · سطوع
           </div>
         </footer>
       </Card>
